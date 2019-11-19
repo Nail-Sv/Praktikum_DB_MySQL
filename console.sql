@@ -58,7 +58,7 @@ CREATE TABLE Fahrzeuge(
 CREATE TABLE Fuehrerscheinklassen(
     KlassenKennung VARCHAR(15) PRIMARY KEY,
     Klassenbezeichnung VARCHAR(15),
-    Beschreibung VARCHAR(15)
+    Beschreibung VARCHAR(25)
 );
 
 -- Ausgefuehlt
@@ -68,6 +68,8 @@ CREATE TABLE Vorbestellungen(
     KFZ_NR INTEGER,
     von DATE,
     bis DATE
+--     CHECK ( von < bis )
+
 );
 
 -- Ausgefuehlt
@@ -100,7 +102,8 @@ CREATE TABLE Person_Fuehrerscheinklasse(
 );
 
 
-ALTER TABLE FahrzeugTypen ADD CONSTRAINT fk_FahrzeugArten FOREIGN KEY (Art_ID) REFERENCES FAHRZEUGARTEN(Art_ID) ON DELETE CASCADE ;
+-- ALTER TABLE FahrzeugTypen ADD CONSTRAINT fk_FahrzeugArten FOREIGN KEY (Art_ID) REFERENCES FAHRZEUGARTEN(Art_ID) ON DELETE CASCADE ;
+ALTER TABLE FahrzeugTypen ADD CONSTRAINT fk_FahrzeugArten FOREIGN KEY (Art_ID) REFERENCES FAHRZEUGARTEN(Art_ID) ON DELETE SET NULL ;
 ALTER TABLE FahrzeugTypen ADD CONSTRAINT fk_Hersteller FOREIGN KEY (HID) REFERENCES Hersteller(HID) ON DELETE CASCADE ;
 ALTER TABLE Fahrzeuge ADD CONSTRAINT fk_FahrzeugTypen FOREIGN KEY (Typ_ID) REFERENCES FahrzeugTypen(Typ_ID) ON DELETE CASCADE;
 --     ALTER TABLE Vorbestellungen ADD CONSTRAINT fk_Kunden FOREIGN KEY (PID) REFERENCES Kunden(PID) ON DELETE SET NULL ;
@@ -156,18 +159,23 @@ INSERT INTO FAHRZEUGE(KFZ_NR, Typ_ID, Preis_pro_Tag, Nummernschild, gelaufene_KM
     VALUES (FAHRZEUG_SEQ.nextval, 3, 300, 33333, 333, '03.03.2003', '03.03.2003', 'Grun', 'Ja', '03.03.2003', '03.03.2003' );
 
 
-INSERT INTO VORBESTELLUNGEN(VID, PID, KFZ_NR, von, bis) VALUES (VORBESTELLUNG_SEQ.nextval, 1, 1, '01.01.2001', '01.01.2001');
-INSERT INTO VORBESTELLUNGEN(VID, PID, KFZ_NR, von, bis) VALUES (VORBESTELLUNG_SEQ.nextval, 2, 2, '02.02.2002', '02.02.2002');
-INSERT INTO VORBESTELLUNGEN(VID, PID, KFZ_NR, von, bis) VALUES (VORBESTELLUNG_SEQ.nextval, 3, 3, '03.03.2003', '03.03.2003');
+INSERT INTO VORBESTELLUNGEN(VID, PID, KFZ_NR, von, bis) VALUES (VORBESTELLUNG_SEQ.nextval, 1, 1, '01.01.2001', '02.01.2001');
+INSERT INTO VORBESTELLUNGEN(VID, PID, KFZ_NR, von, bis) VALUES (VORBESTELLUNG_SEQ.nextval, 2, 2, '02.02.2002', '03.02.2002');
+INSERT INTO VORBESTELLUNGEN(VID, PID, KFZ_NR, von, bis) VALUES (VORBESTELLUNG_SEQ.nextval, 3, 3, '03.03.2003', '04.03.2003');
 
 
-INSERT INTO AUSLEIHEN(von, bis, KFZ_NR, PID, VID) VALUES ('01.01.2001', '01.01.2001', 1, 1, 1);
-INSERT INTO AUSLEIHEN(von, bis, KFZ_NR, PID, VID) VALUES ('02.02.2002', '02.02.2002', 2, 2, 2);
-INSERT INTO AUSLEIHEN(von, bis, KFZ_NR, PID, VID) VALUES ('03.03.2003', '03.03.2003', 3, 3, 3);
+INSERT INTO AUSLEIHEN(von, bis, KFZ_NR, PID, VID) VALUES ('01.01.2001', '02.01.2001', 1, 1, 1);
+INSERT INTO AUSLEIHEN(von, bis, KFZ_NR, PID, VID) VALUES ('02.02.2002', '03.02.2002', 2, 2, 2);
+INSERT INTO AUSLEIHEN(von, bis, KFZ_NR, PID, VID) VALUES ('03.03.2003', '04.03.2003', 3, 3, 3);
 
-INSERT INTO FUEHRERSCHEINKLASSEN(KlassenKennung, Klassenbezeichnung, Beschreibung) VALUES ('A', 'A', 'Klass A');
-INSERT INTO FUEHRERSCHEINKLASSEN(KlassenKennung, Klassenbezeichnung, Beschreibung) VALUES ('B', 'B', 'Klass B');
-INSERT INTO FUEHRERSCHEINKLASSEN(KlassenKennung, Klassenbezeichnung, Beschreibung) VALUES ('C', 'C', 'Klass C');
+INSERT INTO FUEHRERSCHEINKLASSEN(KlassenKennung, Klassenbezeichnung, Beschreibung) VALUES ('A1', 'A1', 'Leichtkrafträder');
+INSERT INTO FUEHRERSCHEINKLASSEN(KlassenKennung, Klassenbezeichnung, Beschreibung) VALUES ('A', 'A', 'Motorrad');
+INSERT INTO FUEHRERSCHEINKLASSEN(KlassenKennung, Klassenbezeichnung, Beschreibung) VALUES ('M', 'M', 'Mofa');
+INSERT INTO FUEHRERSCHEINKLASSEN(KlassenKennung, Klassenbezeichnung, Beschreibung) VALUES ('T', 'T', 'Traktor');
+INSERT INTO FUEHRERSCHEINKLASSEN(KlassenKennung, Klassenbezeichnung, Beschreibung) VALUES ('C1', 'C1', 'Klein-LKW');
+INSERT INTO FUEHRERSCHEINKLASSEN(KlassenKennung, Klassenbezeichnung, Beschreibung) VALUES ('C', 'C', 'Gross-LKW');
+INSERT INTO FUEHRERSCHEINKLASSEN(KlassenKennung, Klassenbezeichnung, Beschreibung) VALUES ('B', 'B', 'PKW');
+INSERT INTO FUEHRERSCHEINKLASSEN(KlassenKennung, Klassenbezeichnung, Beschreibung) VALUES ('BE', 'BE', 'PKW mit Anhänger');
 
 INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('A', '01.01.2001', 1, 'Person A');
 INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('B', '02.02.2002', 2, 'Person B');
@@ -175,19 +183,47 @@ INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) V
 
 CREATE INDEX Ausleihen_Index ON Ausleihen(bis);
 
+                                    -- AUFGABE 1.A oder B
 ALTER TABLE HERSTELLER ADD CONSTRAINT hersteller_check CHECK ( HID IS NOT NULL );
 
                                     -- AUFGABE 1.C
--- DELETE FROM KUNDEN WHERE PID=1;
-DELETE FROM AUSLEIHEN WHERE PID=1;
-DELETE FROM VORBESTELLUNGEN WHERE PID = 1;
-DELETE FROM PERSON_FUEHRERSCHEINKLASSE WHERE PID = 1;
+-- DELETE FROM AUSLEIHEN WHERE PID=1;
+-- DELETE FROM VORBESTELLUNGEN WHERE PID = 1;
+-- DELETE FROM PERSON_FUEHRERSCHEINKLASSE WHERE PID = 1;
 
                                     -- AUFGABE 1.D
-DELETE FROM AUSLEIHEN WHERE VID = 2;
+-- DELETE FROM AUSLEIHEN WHERE VID = 2;
 
-SELECT * FROM KUNDEN;
-SELECT * FROM AUSLEIHEN;
+                                    -- AUFGABE 1.E
+-- DELETE FROM FAHRZEUGTYPEN WHERE Typ_ID = 1;
+-- DELETE FROM FAHRZEUGTYPEN WHERE HID = 3;
+-- SELECT * FROM FAHRZEUGTYPEN;
+
+                                    -- AUFGABE 1.F
+-- SELECT * FROM FUEHRERSCHEINKLASSEN WHERE KlassenKennung = UPPER('a1') ;
+
+                                    -- AUFGABE 1.G
+ALTER TABLE VORBESTELLUNGEN ADD CONSTRAINT check_date CHECK ( von <= bis );
+-- ALTER TABLE AUSLEIHEN ADD CONSTRAINT date_chq CHECK ( von > bis);
+-- ALTER TABLE AUSLEIHEN ADD CONSTRAINT check_ausleihe_vorbestellung CHECK ( von > (SELECT bis FROM Vorbestellungen WHERE VID=(SELECT MAX(VID) FROM Vorbestellungen)));
+
+INSERT INTO HERSTELLER(hid, hersteller_name, adresse) VALUES (HERSTELLER_SEQ.nextval,'Auto 4','Stutgart');
+INSERT INTO KUNDEN(PID, Name, Strasse, Ort, PLZ, Kontonummer, BLZ) VALUES (KUNDE_SEQ.nextval, 'Name 4', 'Strasse 4', 'Ort 4', 4, 44, 444);
+INSERT INTO FAHRZEUGARTEN(Art_ID, Art_Bezeichner) VALUES (FAHRZEUGART_SEQ.nextval, 'Gelendwagen');
+INSERT INTO FAHRZEUGTYPEN(Typ_ID, Art_ID, HID, Typ_Bezeichner, Anzahl_Sitze, Anzahl_Tueren, zul_Gesamtgewicht, zul_hoechstgeschw)
+    VALUES (FAHRZEUGTYP_SEQ.nextval, 4, 4, 'Typ 4', 4, 4, 4000, 4400);
+INSERT INTO FAHRZEUGE(KFZ_NR, Typ_ID, Preis_pro_Tag, Nummernschild, gelaufene_KM, naechste_HU, naechste_ASU, Farbe, Klimaanlage, angemeldet_am, abgemeldet_am)
+    VALUES (FAHRZEUG_SEQ.nextval, 4, 400, 44444, 444, '04.01.2001', '05.01.2001', 'Schwarz', 'Ja', '04.01.2001', '05.01.2001' );
+INSERT INTO VORBESTELLUNGEN(VID, PID, KFZ_NR, von, bis) VALUES (VORBESTELLUNG_SEQ.nextval, 4, 4, '08.01.2001', '09.01.2001');
+INSERT INTO AUSLEIHEN(von, bis, KFZ_NR, PID, VID) VALUES ('06.01.2001', '07.01.2001', 4, 4, 4);
+
+
+
+-- SELECT * FROM KUNDEN;
+-- SELECT * FROM AUSLEIHEN;
 SELECT * FROM VORBESTELLUNGEN;
-SELECT * FROM PERSON_FUEHRERSCHEINKLASSE;
+-- SELECT * FROM PERSON_FUEHRERSCHEINKLASSE;
+-- SELECT * FROM Vorbestellungen where VID=(SELECT MAX(VID) FROM Vorbestellungen);
+
+
 
