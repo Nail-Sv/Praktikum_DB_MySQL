@@ -15,6 +15,7 @@ DROP SEQUENCE HERSTELLER_SEQ;
 DROP SEQUENCE KUNDE_SEQ;
 DROP SEQUENCE VORBESTELLUNG_SEQ;
 
+--
 
 CREATE TABLE FahrzeugArten(
     Art_ID INTEGER PRIMARY KEY,
@@ -33,7 +34,7 @@ CREATE TABLE FahrzeugTypen(
     zul_hoechstgeschw INTEGER
 );
 
-CREATE TABLE Hersteller(
+CREATE TABLE HERSTELLER(
     HID INTEGER PRIMARY KEY,
     Hersteller_Name VARCHAR(15),
     Adresse VARCHAR(15)
@@ -77,13 +78,6 @@ CREATE TABLE Kunden(
     BLZ INTEGER
 );
 
-CREATE TABLE Person_Fuehrerscheinklasse(
-    KlassenKennung VARCHAR(15),
-    seit DATE,
-    PID INTEGER,
-    PRIMARY KEY (KlassenKennung, seit, PID),
-    Bemerkungen VARCHAR(50)
-);
 
 CREATE TABLE Ausleihen(
     von DATE,
@@ -94,6 +88,14 @@ CREATE TABLE Ausleihen(
     VID INTEGER
 
 );
+CREATE TABLE Person_Fuehrerscheinklasse(
+    KlassenKennung VARCHAR(15),
+    seit DATE,
+    PID INTEGER,
+    PRIMARY KEY (KlassenKennung, seit, PID),
+    Bemerkungen VARCHAR(50)
+);
+
 
 ALTER TABLE FahrzeugTypen ADD CONSTRAINT fk_FahrzeugArten FOREIGN KEY (Art_ID) REFERENCES FAHRZEUGARTEN(Art_ID) ON DELETE CASCADE ;
 ALTER TABLE FahrzeugTypen ADD CONSTRAINT fk_Hersteller FOREIGN KEY (HID) REFERENCES Hersteller(HID) ON DELETE CASCADE ;
@@ -106,12 +108,12 @@ ALTER TABLE Ausleihen ADD CONSTRAINT fk_Fahrzeuge_Ausleihe FOREIGN KEY (KFZ_NR) 
 ALTER TABLE Person_Fuehrerscheinklasse ADD CONSTRAINT fk_Fuehrerscheinklassen FOREIGN KEY (KlassenKennung) REFERENCES Fuehrerscheinklassen(KlassenKennung) ON DELETE CASCADE ;
     ALTER TABLE Person_Fuehrerscheinklasse ADD CONSTRAINT fk_Kunden_PID FOREIGN KEY (PID) REFERENCES Kunden(PID) ON DELETE SET NULL ;
 
-CREATE SEQUENCE FAHRZEUG_SEQ;
-CREATE SEQUENCE FAHRZEUGTYP_SEQ;
-CREATE SEQUENCE FAHRZEUGART_SEQ;
-CREATE SEQUENCE HERSTELLER_SEQ;
-CREATE SEQUENCE KUNDE_SEQ;
-CREATE SEQUENCE VORBESTELLUNG_SEQ;
+CREATE SEQUENCE FAHRZEUG_SEQ MINVALUE 0 START WITH 1 INCREMENT BY 1 CACHE 20;
+CREATE SEQUENCE FAHRZEUGTYP_SEQ MINVALUE 0 START WITH 1 INCREMENT BY 1 CACHE 20;
+CREATE SEQUENCE FAHRZEUGART_SEQ MINVALUE 0 START WITH 1 INCREMENT BY 1 CACHE 20;
+CREATE SEQUENCE HERSTELLER_SEQ MINVALUE 0 START WITH 1 INCREMENT BY 1 CACHE 20;
+CREATE SEQUENCE KUNDE_SEQ MINVALUE 0 START WITH 1 INCREMENT BY 1 CACHE 20;
+CREATE SEQUENCE VORBESTELLUNG_SEQ MINVALUE 0 START WITH 1 INCREMENT BY 1 CACHE 20;
 
 
 INSERT INTO HERSTELLER(hid, hersteller_name, adresse) VALUES (HERSTELLER_SEQ.nextval,'lada','Arbat 17');
@@ -122,8 +124,45 @@ INSERT INTO HERSTELLER(hid, hersteller_name, adresse) VALUES (HERSTELLER_SEQ.nex
 INSERT INTO HERSTELLER(hid, hersteller_name, adresse) VALUES (HERSTELLER_SEQ.nextval,'lada','Arbat 17');
 INSERT INTO HERSTELLER(hid, hersteller_name, adresse) VALUES (HERSTELLER_SEQ.nextval,'lada','Arbat 17');
 INSERT INTO HERSTELLER(hid, hersteller_name, adresse) VALUES (HERSTELLER_SEQ.nextval,'lada','Arbat 17');
-SELECT *FROM HERSTELLER;
 
-CREATE INDEX Ausleihen_Index ON Ausleihen(bis)
+INSERT INTO KUNDEN(PID, Name, Strasse, Ort, PLZ, Kontonummer, BLZ) VALUES (KUNDE_SEQ.nextval, 'Name1', 'Strasse1', 'Ort1', 1, 11, 111);
+INSERT INTO KUNDEN(PID, Name, Strasse, Ort, PLZ, Kontonummer, BLZ) VALUES (KUNDE_SEQ.nextval, 'Name2', 'Strasse2', 'Ort2', 2, 22, 222);
+INSERT INTO KUNDEN(PID, Name, Strasse, Ort, PLZ, Kontonummer, BLZ) VALUES (KUNDE_SEQ.nextval, 'Name3', 'Strasse3', 'Ort3', 3, 33, 333);
 
+INSERT INTO FAHRZEUGARTEN(Art_ID, Art_Bezeichner) VALUES (FAHRZEUGART_SEQ.nextval, 'Rodster');
+INSERT INTO FAHRZEUGARTEN(Art_ID, Art_Bezeichner) VALUES (FAHRZEUGART_SEQ.nextval, 'Limo');
+INSERT INTO FAHRZEUGARTEN(Art_ID, Art_Bezeichner) VALUES (FAHRZEUGART_SEQ.nextval, 'Sedan');
+
+INSERT INTO FAHRZEUGTYPEN(Typ_ID, Art_ID, HID, Typ_Bezeichner, Anzahl_Sitze, Anzahl_Tueren, zul_Gesamtgewicht, zul_hoechstgeschw)
+    VALUES (FAHRZEUGTYP_SEQ.nextval, 1, 1, 'Typ1', 2, 2, 1000, 1400);
+INSERT INTO FAHRZEUGTYPEN(Typ_ID, Art_ID, HID, Typ_Bezeichner, Anzahl_Sitze, Anzahl_Tueren, zul_Gesamtgewicht, zul_hoechstgeschw)
+    VALUES (FAHRZEUGTYP_SEQ.nextval, 2, 2, 'Typ2', 12, 6, 1500, 2000);
+INSERT INTO FAHRZEUGTYPEN(Typ_ID, Art_ID, HID, Typ_Bezeichner, Anzahl_Sitze, Anzahl_Tueren, zul_Gesamtgewicht, zul_hoechstgeschw)
+    VALUES (FAHRZEUGTYP_SEQ.nextval, 3, 3, 'Typ3', 5, 5, 1200, 1400);
+
+
+INSERT INTO FAHRZEUGE(KFZ_NR, Typ_ID, Preis_pro_Tag, Nummernschild, gelaufene_KM, naechste_HU, naechste_ASU, Farbe, Klimaanlage, angemeldet_am, abgemeldet_am)
+    VALUES (FAHRZEUG_SEQ.nextval, 1, 100, 11111, 111, '01.01.2001', '01.01.2001', 'Rot', 'Ja', '01.01.2001', '01.01.2001' );
+INSERT INTO FAHRZEUGE(KFZ_NR, Typ_ID, Preis_pro_Tag, Nummernschild, gelaufene_KM, naechste_HU, naechste_ASU, Farbe, Klimaanlage, angemeldet_am, abgemeldet_am)
+    VALUES (FAHRZEUG_SEQ.nextval, 2, 200, 22222, 222, '02.02.2002', '02.02.2002', 'Blau', 'Nein', '02.02.2002', '02.02.2002' );
+INSERT INTO FAHRZEUGE(KFZ_NR, Typ_ID, Preis_pro_Tag, Nummernschild, gelaufene_KM, naechste_HU, naechste_ASU, Farbe, Klimaanlage, angemeldet_am, abgemeldet_am)
+    VALUES (FAHRZEUG_SEQ.nextval, 3, 300, 33333, 333, '03.03.2003', '03.03.2003', 'Grun', 'Ja', '03.03.2003', '03.03.2003' );
+
+
+INSERT INTO VORBESTELLUNGEN(VID, PID, KFZ_NR, von, bis) VALUES (VORBESTELLUNG_SEQ.nextval, 1, 1, '01.01.2001', '01.01.2001');
+INSERT INTO VORBESTELLUNGEN(VID, PID, KFZ_NR, von, bis) VALUES (VORBESTELLUNG_SEQ.nextval, 2, 2, '02.02.2002', '02.02.2002');
+INSERT INTO VORBESTELLUNGEN(VID, PID, KFZ_NR, von, bis) VALUES (VORBESTELLUNG_SEQ.nextval, 3, 3, '03.03.2003', '03.03.2003');
+
+
+INSERT INTO AUSLEIHEN(von, bis, KFZ_NR, PID, VID) VALUES ('01.01.2001', '01.01.2001', 1, 1, 1);
+INSERT INTO AUSLEIHEN(von, bis, KFZ_NR, PID, VID) VALUES ('02.02.2002', '02.02.2002', 2, 2, 2);
+INSERT INTO AUSLEIHEN(von, bis, KFZ_NR, PID, VID) VALUES ('03.03.2003', '03.03.2003', 3, 3, 3);
+
+CREATE INDEX Ausleihen_Index ON Ausleihen(bis);
+
+ALTER TABLE HERSTELLER ADD CONSTRAINT hersteller_check CHECK ( HID IS NOT NULL );
+
+-- SELECT * FROM HERSTELLER;
+SELECT * FROM KUNDEN;
+SELECT * FROM AUSLEIHEN;
 
