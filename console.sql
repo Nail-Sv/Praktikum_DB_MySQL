@@ -126,22 +126,23 @@ CREATE SEQUENCE KUNDE_SEQ MINVALUE 0 START WITH 1 INCREMENT BY 1 CACHE 20;
 CREATE SEQUENCE VORBESTELLUNG_SEQ MINVALUE 0 START WITH 1 INCREMENT BY 1 CACHE 20;
 
 
-INSERT INTO HERSTELLER(hid, hersteller_name, adresse) VALUES (HERSTELLER_SEQ.nextval,'lada','Arbat 17');
-INSERT INTO HERSTELLER(hid, hersteller_name, adresse) VALUES (HERSTELLER_SEQ.nextval,'vaz','Arbat 17555');
-INSERT INTO HERSTELLER(hid, hersteller_name, adresse) VALUES (HERSTELLER_SEQ.nextval,'lada','Arbat 17');
-INSERT INTO HERSTELLER(hid, hersteller_name, adresse) VALUES (HERSTELLER_SEQ.nextval,'lada','Arbat 17');
-INSERT INTO HERSTELLER(hid, hersteller_name, adresse) VALUES (HERSTELLER_SEQ.nextval,'lada','Arbat 17');
-INSERT INTO HERSTELLER(hid, hersteller_name, adresse) VALUES (HERSTELLER_SEQ.nextval,'lada','Arbat 17');
-INSERT INTO HERSTELLER(hid, hersteller_name, adresse) VALUES (HERSTELLER_SEQ.nextval,'lada','Arbat 17');
-INSERT INTO HERSTELLER(hid, hersteller_name, adresse) VALUES (HERSTELLER_SEQ.nextval,'lada','Arbat 17');
+INSERT INTO HERSTELLER(hid, hersteller_name, adresse) VALUES (HERSTELLER_SEQ.nextval,'Audi','Ingelheim');
+INSERT INTO HERSTELLER(hid, hersteller_name, adresse) VALUES (HERSTELLER_SEQ.nextval,'Merceds Benz','Stuttgart');
+INSERT INTO HERSTELLER(hid, hersteller_name, adresse) VALUES (HERSTELLER_SEQ.nextval,'VW','Wolfsburg');
+INSERT INTO HERSTELLER(hid, hersteller_name, adresse) VALUES (HERSTELLER_SEQ.nextval,'Ford','Köln');
+INSERT INTO HERSTELLER(hid, hersteller_name, adresse) VALUES (HERSTELLER_SEQ.nextval,'Opel','Rüsselsheim');
+-- INSERT INTO HERSTELLER(hid, hersteller_name, adresse) VALUES (HERSTELLER_SEQ.nextval,'lada','Arbat 17');
+-- INSERT INTO HERSTELLER(hid, hersteller_name, adresse) VALUES (HERSTELLER_SEQ.nextval,'lada','Arbat 17');
+-- INSERT INTO HERSTELLER(hid, hersteller_name, adresse) VALUES (HERSTELLER_SEQ.nextval,'lada','Arbat 17');
 
 INSERT INTO KUNDEN(PID, Name, Strasse, Ort, PLZ, Kontonummer, BLZ) VALUES (KUNDE_SEQ.nextval, 'Name1', 'Strasse1', 'Ort1', 1, 11, 111);
 INSERT INTO KUNDEN(PID, Name, Strasse, Ort, PLZ, Kontonummer, BLZ) VALUES (KUNDE_SEQ.nextval, 'Name2', 'Strasse2', 'Ort2', 2, 22, 222);
 INSERT INTO KUNDEN(PID, Name, Strasse, Ort, PLZ, Kontonummer, BLZ) VALUES (KUNDE_SEQ.nextval, 'Name3', 'Strasse3', 'Ort3', 3, 33, 333);
 
-INSERT INTO FAHRZEUGARTEN(Art_ID, Art_Bezeichner) VALUES (FAHRZEUGART_SEQ.nextval, 'Rodster');
-INSERT INTO FAHRZEUGARTEN(Art_ID, Art_Bezeichner) VALUES (FAHRZEUGART_SEQ.nextval, 'Limo');
-INSERT INTO FAHRZEUGARTEN(Art_ID, Art_Bezeichner) VALUES (FAHRZEUGART_SEQ.nextval, 'Sedan');
+INSERT INTO FAHRZEUGARTEN(Art_ID, Art_Bezeichner) VALUES (FAHRZEUGART_SEQ.nextval, 'Limousine');
+INSERT INTO FAHRZEUGARTEN(Art_ID, Art_Bezeichner) VALUES (FAHRZEUGART_SEQ.nextval, 'Cabrio');
+INSERT INTO FAHRZEUGARTEN(Art_ID, Art_Bezeichner) VALUES (FAHRZEUGART_SEQ.nextval, 'Combi');
+INSERT INTO FAHRZEUGARTEN(Art_ID, Art_Bezeichner) VALUES (FAHRZEUGART_SEQ.nextval, 'KRAD');
 
 INSERT INTO FAHRZEUGTYPEN(Typ_ID, Art_ID, HID, Typ_Bezeichner, Anzahl_Sitze, Anzahl_Tueren, zul_Gesamtgewicht, zul_hoechstgeschw)
     VALUES (FAHRZEUGTYP_SEQ.nextval, 1, 1, 'Typ1', 2, 2, 1000, 1400);
