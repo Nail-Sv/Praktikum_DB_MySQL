@@ -143,13 +143,19 @@ INSERT INTO FAHRZEUGARTEN(Art_ID, Art_Bezeichner) VALUES (FAHRZEUGART_SEQ.nextva
 INSERT INTO FAHRZEUGARTEN(Art_ID, Art_Bezeichner) VALUES (FAHRZEUGART_SEQ.nextval, 'Cabrio');
 INSERT INTO FAHRZEUGARTEN(Art_ID, Art_Bezeichner) VALUES (FAHRZEUGART_SEQ.nextval, 'Combi');
 INSERT INTO FAHRZEUGARTEN(Art_ID, Art_Bezeichner) VALUES (FAHRZEUGART_SEQ.nextval, 'KRAD');
+INSERT INTO FAHRZEUGARTEN(Art_ID, Art_Bezeichner) VALUES (FAHRZEUGART_SEQ.nextval, 'Leichtkrad');
+INSERT INTO FAHRZEUGARTEN(Art_ID, Art_Bezeichner) VALUES (FAHRZEUGART_SEQ.nextval, 'LKW');
 
 INSERT INTO FAHRZEUGTYPEN(Typ_ID, Art_ID, HID, Typ_Bezeichner, Anzahl_Sitze, Anzahl_Tueren, zul_Gesamtgewicht, zul_hoechstgeschw)
-    VALUES (FAHRZEUGTYP_SEQ.nextval, 1, 1, 'Typ1', 2, 2, 1000, 1400);
+    VALUES (FAHRZEUGTYP_SEQ.nextval, 3, 1, 'A4 Avant', 5, 5, 1500, 205);
 INSERT INTO FAHRZEUGTYPEN(Typ_ID, Art_ID, HID, Typ_Bezeichner, Anzahl_Sitze, Anzahl_Tueren, zul_Gesamtgewicht, zul_hoechstgeschw)
-    VALUES (FAHRZEUGTYP_SEQ.nextval, 2, 2, 'Typ2', 12, 6, 1500, 2000);
+    VALUES (FAHRZEUGTYP_SEQ.nextval, 2, 2, 'SLK 200', 4, 2, 1200, 225);
 INSERT INTO FAHRZEUGTYPEN(Typ_ID, Art_ID, HID, Typ_Bezeichner, Anzahl_Sitze, Anzahl_Tueren, zul_Gesamtgewicht, zul_hoechstgeschw)
-    VALUES (FAHRZEUGTYP_SEQ.nextval, 3, 3, 'Typ3', 5, 5, 1200, 1400);
+    VALUES (FAHRZEUGTYP_SEQ.nextval, 1, 1, 'A3', 5, 3, 1100, 198);
+INSERT INTO FAHRZEUGTYPEN(Typ_ID, Art_ID, HID, Typ_Bezeichner, Anzahl_Sitze, Anzahl_Tueren, zul_Gesamtgewicht, zul_hoechstgeschw)
+    VALUES (FAHRZEUGTYP_SEQ.nextval, 1, 3, 'Golf', 5, 3, 1150, 202);
+INSERT INTO FAHRZEUGTYPEN(Typ_ID, Art_ID, HID, Typ_Bezeichner, Anzahl_Sitze, Anzahl_Tueren, zul_Gesamtgewicht, zul_hoechstgeschw)
+    VALUES (FAHRZEUGTYP_SEQ.nextval, 1, 4, 'Focus', 5, 3, 1080, 185);
 
 
 INSERT INTO FAHRZEUGE(KFZ_NR, Typ_ID, Preis_pro_Tag, Nummernschild, gelaufene_KM, naechste_HU, naechste_ASU, Farbe, Klimaanlage, angemeldet_am, abgemeldet_am)
@@ -227,7 +233,7 @@ ALTER TABLE HERSTELLER ADD CONSTRAINT hersteller_check CHECK ( HID IS NOT NULL )
 -- ALTER TABLE VORBESTELLUNGEN ADD CONSTRAINT check_date CHECK ( von <= bis );
 
                                     -- AUFGABE 1.H UNKLAR
--- Попробовать CREATE ASSERTION
+
 
 -- ALTER TABLE AUSLEIHEN ADD CONSTRAINT date_chq CHECK ( von > bis);
 -- ALTER TABLE AUSLEIHEN ADD CONSTRAINT check_ausleihe_vorbestellung CHECK ( von > (SELECT bis FROM Vorbestellungen WHERE VID=(SELECT MAX(VID) FROM Vorbestellungen)));
