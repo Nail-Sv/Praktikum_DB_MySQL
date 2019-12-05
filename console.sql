@@ -178,7 +178,17 @@ INSERT INTO FUEHRERSCHEINKLASSEN(KlassenKennung, Klassenbezeichnung, Beschreibun
 INSERT INTO FUEHRERSCHEINKLASSEN(KlassenKennung, Klassenbezeichnung, Beschreibung) VALUES ('BE', 'BE', 'PKW mit Anhänger');
 
 INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('A', '01.01.2001', 1, 'Person A');
-INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('B', '02.02.2002', 2, 'Person B');
+
+-- INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('B', '02.02.2002', 2, 'Person B');
+
+INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('A1', '03.03.2003', 2, 'Person C');
+INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('A', '03.03.2003', 2, 'Person C');
+INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('M', '03.03.2003', 2, 'Person C');
+INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('T', '03.03.2003', 2, 'Person C');
+INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('C1', '03.03.2003', 2, 'Person C');
+INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('C', '03.03.2003', 2, 'Person C');
+INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('B', '03.03.2003', 2, 'Person C');
+INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('BE', '03.03.2003', 2, 'Person C');
 
 INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('A1', '03.03.2003', 3, 'Person C');
 INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('A', '03.03.2003', 3, 'Person C');
@@ -188,6 +198,8 @@ INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) V
 INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('C', '03.03.2003', 3, 'Person C');
 INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('B', '03.03.2003', 3, 'Person C');
 INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('BE', '03.03.2003', 3, 'Person C');
+
+COMMIT;
 
 CREATE INDEX Ausleihen_Index ON Ausleihen(bis);
 
@@ -211,7 +223,11 @@ ALTER TABLE HERSTELLER ADD CONSTRAINT hersteller_check CHECK ( HID IS NOT NULL )
 -- SELECT * FROM FUEHRERSCHEINKLASSEN WHERE KlassenKennung = UPPER('a1') ;
 
                                     -- AUFGABE 1.G
-ALTER TABLE VORBESTELLUNGEN ADD CONSTRAINT check_date CHECK ( von <= bis );
+-- ALTER TABLE VORBESTELLUNGEN ADD CONSTRAINT check_date CHECK ( von <= bis );
+
+                                    -- AUFGABE 1.H UNKLAR
+-- Попробовать CREATE ASSERTION
+
 -- ALTER TABLE AUSLEIHEN ADD CONSTRAINT date_chq CHECK ( von > bis);
 -- ALTER TABLE AUSLEIHEN ADD CONSTRAINT check_ausleihe_vorbestellung CHECK ( von > (SELECT bis FROM Vorbestellungen WHERE VID=(SELECT MAX(VID) FROM Vorbestellungen)));
 
@@ -230,7 +246,7 @@ INSERT INTO AUSLEIHEN(von, bis, KFZ_NR, PID, VID) VALUES ('06.01.2001', '07.01.2
                                     -- AUFGABE 2.A
 SELECT KFZ_NR, Nummernschild, Typ_Bezeichner, Anzahl_Tueren FROM FAHRZEUGE, FAHRZEUGTYPEN WHERE angemeldet_am IS NOT NULL AND Anzahl_Tueren > 2;
 
-                                    -- AUFGABE 2.B
+                                    -- AUFGABE 2.B UNKLAR
 
 
                                     -- AUFGABE 2.C
@@ -241,7 +257,8 @@ SELECT Kunden.PID, Kunden.Name, COUNT(*) over ()
 FROM Kunden
 INNER JOIN Person_Fuehrerscheinklasse on Person_Fuehrerscheinklasse.PID = Kunden.PID
 WHERE KlassenKennung IN ('A1', 'A', 'M', 'T', 'C1', 'C', 'B', 'BE' )
-GROUP BY Kunden.PID, Kunden.Name HAVING COUNT(*) > 1
+GROUP BY Kunden.PID, Kunden.Name HAVING COUNT(Kunden.PID) = 8;
+
 
 
 
