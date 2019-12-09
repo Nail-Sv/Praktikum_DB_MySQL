@@ -44,7 +44,7 @@ CREATE TABLE Fahrzeuge(
     KFZ_NR INTEGER PRIMARY KEY,
     Typ_ID INTEGER,
     Preis_pro_Tag INTEGER,
-    Nummernschild INTEGER,
+    Nummernschild VARCHAR(15),
     gelaufene_KM INTEGER,
     naechste_HU DATE,
     naechste_ASU DATE,
@@ -159,11 +159,25 @@ INSERT INTO FAHRZEUGTYPEN(Typ_ID, Art_ID, HID, Typ_Bezeichner, Anzahl_Sitze, Anz
 
 
 INSERT INTO FAHRZEUGE(KFZ_NR, Typ_ID, Preis_pro_Tag, Nummernschild, gelaufene_KM, naechste_HU, naechste_ASU, Farbe, Klimaanlage, angemeldet_am, abgemeldet_am)
-    VALUES (FAHRZEUG_SEQ.nextval, 1, 100, 11111, 111, '01.01.2001', '01.01.2001', 'Rot', 'Ja', '01.01.2001', '01.01.2001' );
+    VALUES (1296833, 1, 98, 'GM-AL 455', 123450, SYSDATE+100, SYSDATE+100, 'silber', 'JA. Automatisch', SYSDATE-10, NULL );
 INSERT INTO FAHRZEUGE(KFZ_NR, Typ_ID, Preis_pro_Tag, Nummernschild, gelaufene_KM, naechste_HU, naechste_ASU, Farbe, Klimaanlage, angemeldet_am, abgemeldet_am)
-    VALUES (FAHRZEUG_SEQ.nextval, 2, 200, 22222, 222, '02.02.2002', '02.02.2002', 'Blau', 'Nein', '02.02.2002', '02.02.2002' );
+    VALUES (2334556, 2, 139, 'GM-HG 34', 160000, SYSDATE+120, SYSDATE+120, 'silber', 'JA. Automatish', SYSDATE-90, NULL );
 INSERT INTO FAHRZEUGE(KFZ_NR, Typ_ID, Preis_pro_Tag, Nummernschild, gelaufene_KM, naechste_HU, naechste_ASU, Farbe, Klimaanlage, angemeldet_am, abgemeldet_am)
-    VALUES (FAHRZEUG_SEQ.nextval, 3, 300, 33333, 333, '03.03.2003', '03.03.2003', 'Grun', 'Ja', '03.03.2003', '03.03.2003' );
+    VALUES (9998767, 3, 56, 'RS-JK 980', 120000, SYSDATE-30, SYSDATE-30, 'gelb', 'JA. Manuel', SYSDATE-160, SYSDATE );
+INSERT INTO FAHRZEUGE(KFZ_NR, Typ_ID, Preis_pro_Tag, Nummernschild, gelaufene_KM, naechste_HU, naechste_ASU, Farbe, Klimaanlage, angemeldet_am, abgemeldet_am)
+    VALUES (4567673, 4, 37, 'K-LM 2344', 135000, SYSDATE+55, SYSDATE+55, 'blau', 'NEIN', SYSDATE-200, NULL );
+INSERT INTO FAHRZEUGE(KFZ_NR, Typ_ID, Preis_pro_Tag, Nummernschild, gelaufene_KM, naechste_HU, naechste_ASU, Farbe, Klimaanlage, angemeldet_am, abgemeldet_am)
+    VALUES (8968585, 5, 39, 'GM-LO 780', 89000, SYSDATE+10, SYSDATE+10, 'rot', 'NEIN', SYSDATE-300, NULL );
+INSERT INTO FAHRZEUGE(KFZ_NR, Typ_ID, Preis_pro_Tag, Nummernschild, gelaufene_KM, naechste_HU, naechste_ASU, Farbe, Klimaanlage, angemeldet_am, abgemeldet_am)
+    VALUES (5696833, 1, 108, 'GM-LB 155', 123450, SYSDATE+100, SYSDATE+100, 'silber', 'JA. Automatisch', SYSDATE-10, NULL );
+INSERT INTO FAHRZEUGE(KFZ_NR, Typ_ID, Preis_pro_Tag, Nummernschild, gelaufene_KM, naechste_HU, naechste_ASU, Farbe, Klimaanlage, angemeldet_am, abgemeldet_am)
+    VALUES (7834556, 2, 119, 'GL-HF 324', 160000, SYSDATE+120, SYSDATE+120, 'silber', 'JA. Manuel', SYSDATE-90, NULL );
+INSERT INTO FAHRZEUGE(KFZ_NR, Typ_ID, Preis_pro_Tag, Nummernschild, gelaufene_KM, naechste_HU, naechste_ASU, Farbe, Klimaanlage, angemeldet_am, abgemeldet_am)
+    VALUES (4498767, 3, 66, 'RS-ID 850', 120000, SYSDATE-30, SYSDATE-30, 'gelb', 'JA. Manuel', SYSDATE-160, SYSDATE );
+INSERT INTO FAHRZEUGE(KFZ_NR, Typ_ID, Preis_pro_Tag, Nummernschild, gelaufene_KM, naechste_HU, naechste_ASU, Farbe, Klimaanlage, angemeldet_am, abgemeldet_am)
+    VALUES (2367673, 4, 57, 'K-DT 1244', 135000, SYSDATE+55, SYSDATE+55, 'blau', 'NEIN', SYSDATE-200, NULL );
+INSERT INTO FAHRZEUGE(KFZ_NR, Typ_ID, Preis_pro_Tag, Nummernschild, gelaufene_KM, naechste_HU, naechste_ASU, Farbe, Klimaanlage, angemeldet_am, abgemeldet_am)
+    VALUES (4568585, 5, 59, 'GL-LR 180', 89000, SYSDATE+10, SYSDATE+10, 'rot', 'NEIN', SYSDATE-300, NULL );
 
 
 INSERT INTO VORBESTELLUNGEN(VID, PID, KFZ_NR, von, bis) VALUES (VORBESTELLUNG_SEQ.nextval, 1, 1, '01.01.2001', '02.01.2001');
