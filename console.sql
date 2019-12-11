@@ -55,9 +55,9 @@ CREATE TABLE Fahrzeuge(
     abgemeldet_am DATE
 );
 
--- Ausgefuehlt
+
 CREATE TABLE Fuehrerscheinklassen(
-    KlassenKennung VARCHAR(25) PRIMARY KEY,
+    KlassenKennung VARCHAR(25) PRIMARY KEY CHECK ( UPPER(KlassenKennung) IN ('A1', 'A', 'M', 'T', 'C1', 'C', 'B', 'BE') ),
     Klassenbezeichnung VARCHAR(25),
     Beschreibung VARCHAR(25)
 );
@@ -72,8 +72,7 @@ CREATE TABLE Vorbestellungen(
 --     CHECK ( von < bis )
 
 );
---
--- Ausgefuehlt
+
 CREATE TABLE Kunden(
     PID INTEGER PRIMARY KEY ,
     Name VARCHAR(25),
@@ -84,7 +83,6 @@ CREATE TABLE Kunden(
     BLZ INTEGER
 );
 
--- Ausgefuehlt
 CREATE TABLE Ausleihen(
     von DATE,
     bis DATE,
@@ -119,8 +117,8 @@ ALTER TABLE Vorbestellungen ADD CONSTRAINT fk_Fahrzeuge FOREIGN KEY (KFZ_NR) REF
 ALTER TABLE Ausleihen ADD CONSTRAINT fk_Fahrzeuge_Ausleihe FOREIGN KEY (KFZ_NR) REFERENCES Fahrzeuge(KFZ_NR) ON DELETE CASCADE ;
 --     ALTER TABLE Ausleihen ADD CONSTRAINT fk_Kunde FOREIGN KEY (PID) REFERENCES Kunden(PID) ON DELETE SET NULL ;
     ALTER TABLE Ausleihen ADD CONSTRAINT fk_Kunde FOREIGN KEY (PID) REFERENCES Kunden(PID) ON DELETE CASCADE ;
-    ALTER TABLE Ausleihen ADD CONSTRAINT fk_Vorbestellungen FOREIGN KEY (VID) REFERENCES Vorbestellungen(VID) ON DELETE CASCADE ;
---     ALTER TABLE Ausleihen ADD CONSTRAINT fk_Vorbestellungen FOREIGN KEY (VID) REFERENCES Vorbestellungen(VID) ON DELETE SET NULL ;
+--     ALTER TABLE Ausleihen ADD CONSTRAINT fk_Vorbestellungen FOREIGN KEY (VID) REFERENCES Vorbestellungen(VID) ON DELETE CASCADE ;
+    ALTER TABLE Ausleihen ADD CONSTRAINT fk_Vorbestellungen FOREIGN KEY (VID) REFERENCES Vorbestellungen(VID) ON DELETE SET NULL ;
 ALTER TABLE Person_Fuehrerscheinklasse ADD CONSTRAINT fk_Fuehrerscheinklassen FOREIGN KEY (KlassenKennung) REFERENCES Fuehrerscheinklassen(KlassenKennung) ON DELETE CASCADE ;
 --     ALTER TABLE Person_Fuehrerscheinklasse ADD CONSTRAINT fk_Kunden_PID FOREIGN KEY (PID) REFERENCES Kunden(PID) ON DELETE SET NULL ;
     ALTER TABLE Person_Fuehrerscheinklasse ADD CONSTRAINT fk_Kunden_PID FOREIGN KEY (PID) REFERENCES Kunden(PID) ON DELETE CASCADE ;
@@ -231,8 +229,6 @@ INSERT INTO FUEHRERSCHEINKLASSEN(KlassenKennung, Klassenbezeichnung, Beschreibun
 INSERT INTO FUEHRERSCHEINKLASSEN(KlassenKennung, Klassenbezeichnung, Beschreibung) VALUES ('B', 'PKW', 'blupp');
 INSERT INTO FUEHRERSCHEINKLASSEN(KlassenKennung, Klassenbezeichnung, Beschreibung) VALUES ('BE', 'PKW mit Anhänger', NULL);
 
--- INSERT INTO FUEHRERSCHEINKLASSEN(KlassenKennung, Klassenbezeichnung, Beschreibung) VALUES ('T', 'T', 'Traktor');
-
 
 INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('B', SYSDATE-100, 1, NULL);
 INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('B', SYSDATE-200, 2, NULL);
@@ -243,27 +239,7 @@ INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) V
 INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('BE',SYSDATE-300, 2, NULL);
 INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('BE',SYSDATE-250, 3, NULL);
 
--- INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('B', '02.02.2002', 2, 'Person B');
 
--- INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('A1', '03.03.2003', 2, 'Person C');
--- INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('A', '03.03.2003', 2, 'Person C');
--- INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('M', '03.03.2003', 2, 'Person C');
--- INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('T', '03.03.2003', 2, 'Person C');
--- INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('C1', '03.03.2003', 2, 'Person C');
--- INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('C', '03.03.2003', 2, 'Person C');
--- INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('B', '03.03.2003', 2, 'Person C');
--- INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('BE', '03.03.2003', 2, 'Person C');
---
--- INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('A1', '03.03.2003', 3, 'Person C');
--- INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('A', '03.03.2003', 3, 'Person C');
--- INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('M', '03.03.2003', 3, 'Person C');
--- INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('T', '03.03.2003', 3, 'Person C');
--- INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('C1', '03.03.2003', 3, 'Person C');
--- INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('C', '03.03.2003', 3, 'Person C');
--- INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('B', '03.03.2003', 3, 'Person C');
--- INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('BE', '03.03.2003', 3, 'Person C');
-
--- NOT WORKING
 INSERT INTO FAHRZEUGTYP_FUERERSCHEINKLASSE(Typ_ID, KlassenKennung) VALUES (1, 'B');
 INSERT INTO FAHRZEUGTYP_FUERERSCHEINKLASSE(Typ_ID, KlassenKennung) VALUES (2, 'B');
 INSERT INTO FAHRZEUGTYP_FUERERSCHEINKLASSE(Typ_ID, KlassenKennung) VALUES (3, 'B');
@@ -275,34 +251,61 @@ INSERT INTO FAHRZEUGTYP_FUERERSCHEINKLASSE(Typ_ID, KlassenKennung) VALUES (3, 'B
 INSERT INTO FAHRZEUGTYP_FUERERSCHEINKLASSE(Typ_ID, KlassenKennung) VALUES (4, 'BE');
 INSERT INTO FAHRZEUGTYP_FUERERSCHEINKLASSE(Typ_ID, KlassenKennung) VALUES (5, 'BE');
 
-COMMIT;
-
 CREATE INDEX Ausleihen_Index ON Ausleihen(bis);
 
-                                    -- AUFGABE 1.A oder B
-ALTER TABLE HERSTELLER ADD CONSTRAINT hersteller_check CHECK ( HID IS NOT NULL );
+                                    -- AUFGABE 1.A
+-- INSERT INTO KUNDEN(PID, Name, Strasse, Ort, PLZ, Kontonummer, BLZ)
+--     VALUES (KUNDE_SEQ.nextval, 'Test 1', 'TestStrasse', 'TestOrt', 111,111,111);
+-- SELECT * FROM KUNDEN;
+-- DELETE FROM KUNDEN WHERE PID = 6;
+-- SELECT * FROM KUNDEN;
+
+
+
+                                    -- AUFGABE B
+-- ALTER TABLE HERSTELLER ADD CONSTRAINT adresse_check CHECK ( ADRESSE IS NOT NULL );
+-- INSERT INTO HERSTELLER(hid, hersteller_name, adresse)
+--     VALUES(9, 'TestAuto', '');
+-- DELETE FROM HERSTELLER WHERE HID > 5;
+-- SELECT * FROM HERSTELLER;
 
                                     -- AUFGABE 1.C
--- DELETE FROM AUSLEIHEN WHERE PID=1;
--- DELETE FROM VORBESTELLUNGEN WHERE PID = 1;
--- DELETE FROM PERSON_FUEHRERSCHEINKLASSE WHERE PID = 1;
+-- kann nicht set null verwenden, da PK kann nicht = 0 sein, deswegen nur delete cascade
+--     SELECT * FROM AUSLEIHEN;
+--     SELECT * FROM VORBESTELLUNGEN;
+--     SELECT * FROM KUNDEN;
+--     DELETE FROM KUNDEN WHERE PID=1;
 
                                     -- AUFGABE 1.D
--- DELETE FROM AUSLEIHEN WHERE VID = 2;
+-- SELECT * FROM AUSLEIHEN;
+-- DELETE FROM VORBESTELLUNGEN WHERE VID = 1;
 
                                     -- AUFGABE 1.E
--- DELETE FROM FAHRZEUGTYPEN WHERE Typ_ID = 1;
--- DELETE FROM FAHRZEUGTYPEN WHERE HID = 3;
+-- bei ORACLE nur SET NULL oder CASCADE
 -- SELECT * FROM FAHRZEUGTYPEN;
+-- SELECT * FROM FAHRZEUGARTEN;
+-- DELETE FROM FAHRZEUGARTEN WHERE ART_ID = 3;
 
                                     -- AUFGABE 1.F
--- SELECT * FROM FUEHRERSCHEINKLASSEN WHERE KlassenKennung = UPPER('a1') ;
+-- INSERT INTO FUEHRERSCHEINKLASSEN(klassenkennung, klassenbezeichnung, beschreibung)
+--     VALUES ('T', 'blup', '');
+-- SELECT * FROM FUEHRERSCHEINKLASSEN;
+-- DELETE FROM FUEHRERSCHEINKLASSEN WHERE KLASSENBEZEICHNUNG = 'blup';
+--         SELECT * FROM FUEHRERSCHEINKLASSEN WHERE KlassenKennung = UPPER('a1') ;
 
                                     -- AUFGABE 1.G
+-- INSERT INTO VORBESTELLUNGEN(VID, PID, KFZ_NR, von, bis) VALUES (14, 2, 2367673, SYSDATE+3, SYSDATE+2);
+-- SELECT * FROM VORBESTELLUNGEN;
+-- DELETE FROM VORBESTELLUNGEN WHERE VID > 12;
 -- ALTER TABLE VORBESTELLUNGEN ADD CONSTRAINT check_date CHECK ( von <= bis );
 
-                                    -- AUFGABE 1.H UNKLAR
+                                    -- AUFGABE 1.H
+-- kann nicht in CHECK 2 tabelle zusammen verbinden
 
+
+
+
+                                -- OPTIONALLE AUFGABEN
 
 -- ALTER TABLE AUSLEIHEN ADD CONSTRAINT date_chq CHECK ( von > bis);
 -- ALTER TABLE AUSLEIHEN ADD CONSTRAINT check_ausleihe_vorbestellung CHECK ( von > (SELECT bis FROM Vorbestellungen WHERE VID=(SELECT MAX(VID) FROM Vorbestellungen)));
@@ -320,19 +323,19 @@ ALTER TABLE HERSTELLER ADD CONSTRAINT hersteller_check CHECK ( HID IS NOT NULL )
 
 
                                     -- AUFGABE 2.A
-SELECT KFZ_NR, Nummernschild, Typ_Bezeichner, Anzahl_Tueren FROM FAHRZEUGE, FAHRZEUGTYPEN WHERE angemeldet_am IS NOT NULL AND Anzahl_Tueren > 2;
+-- SELECT KFZ_NR, Nummernschild, Typ_Bezeichner, Anzahl_Tueren FROM FAHRZEUGE, FAHRZEUGTYPEN WHERE angemeldet_am IS NOT NULL AND Anzahl_Tueren > 2;
 
                                     -- AUFGABE 2.B UNKLAR
 
 
                                     -- AUFGABE 2.C
-SELECT KFZ_NR, Nummernschild FROM FAHRZEUGE, FAHRZEUGTYPEN WHERE angemeldet_am IS NULL;
+-- SELECT KFZ_NR, Nummernschild FROM FAHRZEUGE, FAHRZEUGTYPEN WHERE angemeldet_am IS NULL;
 
                                     -- AUFGABE 2.D
 SELECT Kunden.PID, Kunden.Name, COUNT(*) over ()
 FROM Kunden
 INNER JOIN Person_Fuehrerscheinklasse on Person_Fuehrerscheinklasse.PID = Kunden.PID
-WHERE KlassenKennung IN ('A1', 'A', 'M', 'T', 'C1', 'C', 'B', 'BE' )
+WHERE KlassenKennung IN ('A1', 'A', 'M', 'C1', 'C', 'B', 'BE' )
 GROUP BY Kunden.PID, Kunden.Name HAVING COUNT(Kunden.PID) = 8;
 
 
@@ -343,7 +346,7 @@ GROUP BY Kunden.PID, Kunden.Name HAVING COUNT(Kunden.PID) = 8;
 -- SELECT * FROM VORBESTELLUNGEN;
 -- SELECT * FROM PERSON_FUEHRERSCHEINKLASSE;
 -- SELECT * FROM Vorbestellungen where VID=(SELECT MAX(VID) FROM Vorbestellungen);
-SELECT  * FROM FAHRZEUGTYP_FUERERSCHEINKLASSE;
+-- SELECT  * FROM FAHRZEUGTYP_FUERERSCHEINKLASSE;
 
 
 
