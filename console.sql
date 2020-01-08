@@ -1,352 +1,394 @@
-DROP TABLE Ausleihen;
-DROP TABLE Vorbestellungen;
-DROP TABLE Person_Fuehrerscheinklasse;
-DROP TABLE Kunden;
-DROP TABLE FAHRZEUGTYP_FUERERSCHEINKLASSE;
-DROP TABLE Fahrzeuge;
-DROP TABLE FahrzeugTypen;
-DROP TABLE Fuehrerscheinklassen;
-DROP TABLE Hersteller;
-DROP TABLE FahrzeugArten;
+DROP TABLE Fahrzeug_Fuehrerscheinklasse CASCADE CONSTRAINTS;
+DROP TABLE Person_Fuehrerscheinklasse CASCADE CONSTRAINTS;
+DROP TABLE Fuehrerscheinklassen CASCADE CONSTRAINTS;
+DROP TABLE Ausleihen CASCADE CONSTRAINTS;
+DROP TABLE Vorbestellungen CASCADE CONSTRAINTS;
+DROP TABLE Fahrzeuge CASCADE CONSTRAINTS;
+DROP TABLE FahrzeugTypen CASCADE CONSTRAINTS;
+DROP TABLE Hersteller CASCADE CONSTRAINTS;
+DROP TABLE Kunden CASCADE CONSTRAINTS;
+DROP TABLE FahrzeugArten CASCADE CONSTRAINTS;
 
-DROP SEQUENCE FAHRZEUG_SEQ;
-DROP SEQUENCE FAHRZEUGTYP_SEQ;
-DROP SEQUENCE FAHRZEUGART_SEQ;
-DROP SEQUENCE HERSTELLER_SEQ;
-DROP SEQUENCE KUNDE_SEQ;
-DROP SEQUENCE VORBESTELLUNG_SEQ;
+DROP VIEW Nichtausleihen_V;
+DROP VIEW Ausleihen_V;
 
--- Ausgefuehlt
-CREATE TABLE FahrzeugArten(
-    Art_ID INTEGER PRIMARY KEY,
-    Art_Bezeichner VARCHAR(15)
+DROP SEQUENCE vorb_seq;
+
+
+CREATE TABLE Fahrzeug_Fuehrerscheinklasse (
+       Typ_ID               	NUMBER(9) NOT NULL,
+       KlassenKennung       	VARCHAR2(2) NOT NULL
 );
 
--- Ausgefuehlt
-CREATE TABLE FahrzeugTypen(
-    Typ_ID INTEGER PRIMARY KEY,
-    Art_ID INTEGER,
-    HID INTEGER,
-    Typ_Bezeichner VARCHAR(15),
-    Anzahl_Sitze INTEGER,
-    Anzahl_Tueren INTEGER,
-    zul_Gesamtgewicht INTEGER,
-    zul_hoechstgeschw INTEGER
-);
--- Ausgefuehlt
-CREATE TABLE HERSTELLER(
-    HID INTEGER PRIMARY KEY,
-    Hersteller_Name VARCHAR(15),
-    Adresse VARCHAR(15)
-);
+ALTER TABLE Fahrzeug_Fuehrerscheinklasse
+       ADD  ( CONSTRAINT XPKFahrzeug_Fuehrerscheinklass PRIMARY KEY (
+              Typ_ID, KlassenKennung) ) ;
 
--- Ausgefuehlt
-CREATE TABLE Fahrzeuge(
-    KFZ_NR INTEGER PRIMARY KEY,
-    Typ_ID INTEGER,
-    Preis_pro_Tag INTEGER,
-    Nummernschild VARCHAR(15),
-    gelaufene_KM INTEGER,
-    naechste_HU DATE,
-    naechste_ASU DATE,
-    Farbe VARCHAR(15),
-    Klimaanlage VARCHAR(15),
-    angemeldet_am DATE,
-    abgemeldet_am DATE
+
+CREATE TABLE Person_Fuehrerscheinklasse (
+       KlassenKennung       VARCHAR2(2) NOT NULL,
+       PID                          NUMBER(9) NOT NULL,
+       seit                          DATE NOT NULL,
+       Bemerkungen          VARCHAR2(2000) NULL
 );
 
 
-CREATE TABLE Fuehrerscheinklassen(
-    KlassenKennung VARCHAR(25) PRIMARY KEY CHECK ( UPPER(KlassenKennung) IN ('A1', 'A', 'M', 'T', 'C1', 'C', 'B', 'BE') ),
-    Klassenbezeichnung VARCHAR(25),
-    Beschreibung VARCHAR(25)
+ALTER TABLE Person_Fuehrerscheinklasse
+       ADD  ( CONSTRAINT XPKPerson_Fuehrerscheinklasse PRIMARY KEY (
+KlassenKennung, seit, PID) ) ;
+
+
+
+CREATE TABLE Fuehrerscheinklassen (
+       KlassenKennung         VARCHAR2(2) NOT NULL,
+       Klassenbezeichnung   VARCHAR2(50) NOT NULL,
+       Beschreibung             VARCHAR2(2000) NULL
 );
 
--- Ausgefuehlt
-CREATE TABLE Vorbestellungen(
-    VID INTEGER PRIMARY KEY,
-    PID INTEGER,
-    KFZ_NR INTEGER,
-    von DATE,
-    bis DATE
---     CHECK ( von < bis )
 
+ALTER TABLE Fuehrerscheinklassen
+       ADD  ( CONSTRAINT XPKFuehrerscheinklassen PRIMARY KEY (
+              KlassenKennung) ) ;
+
+
+
+CREATE TABLE Ausleihen (
+       von                  DATE NOT NULL,
+       bis                   DATE NOT NULL,
+       KFZ_NR           NUMBER(9) NOT NULL,
+       PID                  NUMBER(9) NOT NULL,
+       VID                  NUMBER(9) NULL,
+       CONSTRAINT Vorb_Datum14        CHECK (von <= bis)
 );
 
-CREATE TABLE Kunden(
-    PID INTEGER PRIMARY KEY ,
-    Name VARCHAR(25),
-    Strasse VARCHAR(25),
-    Ort VARCHAR(15),
-    PLZ INTEGER,
-    Kontonummer INTEGER,
-    BLZ INTEGER
+ALTER TABLE Ausleihen
+       ADD  ( CONSTRAINT XPKAusleihen PRIMARY KEY (von, bis, KFZ_NR,
+              PID) ) ;
+
+
+
+CREATE TABLE Vorbestellungen (
+       VID                  NUMBER(9) NOT NULL,
+       PID                  NUMBER(9) NOT NULL,
+       KFZ_NR           NUMBER(9) NOT NULL,
+       von                  DATE NOT NULL,
+       bis                  DATE NOT NULL,
+       CONSTRAINT Vorb_Datum15   CHECK (von <= bis)
 );
 
-CREATE TABLE Ausleihen(
-    von DATE,
-    bis DATE,
-    KFZ_NR INTEGER,
-    PID INTEGER,
-    PRIMARY KEY (von, bis, KFZ_NR, PID),
-    VID INTEGER
 
+ALTER TABLE Vorbestellungen
+       ADD  ( CONSTRAINT XPKVorbestellungen PRIMARY KEY (VID) ) ;
+
+
+
+CREATE TABLE Fahrzeuge (
+       KFZ_NR               	NUMBER(9) NOT NULL,
+       Typ_ID               	NUMBER(9) NOT NULL,
+       Preis_pro_Tag       	NUMBER(6,2) NOT NULL
+                                   	CONSTRAINT preis_grenze7
+                                          CHECK (preis_pro_tag >= 0),
+       gelaufene_KM         	NUMBER(7) NULL
+                                   	CONSTRAINT km_grenze7
+                                          CHECK (gelaufene_km >= 0),
+       Nummernschild       	 VARCHAR2(20) NOT NULL,
+       naechste_HU          	DATE NOT NULL,
+       naechste_ASU         	DATE NOT NULL,
+       Farbe                	VARCHAR2(20) NULL
+                                   	CONSTRAINT farbwahl9
+                                          	CHECK (UPPER(farbe) IN ('ROT','GELB','WEISS','SCHWARZ','BLAU','GRUEN','SILBER','BRAUN')),
+       Klimaanlage          	VARCHAR2(20) NULL,
+       angemeldet_am        	DATE NOT NULL,
+       abgemeldet_am        	DATE NULL,
+       CONSTRAINT hu_grenze7     CHECK (naechste_HU  < abgemeldet_am AND naechste_HU  > angemeldet_am),
+       CONSTRAINT asu_grenze12   CHECK (naechste_ASU < abgemeldet_am AND naechste_ASU > angemeldet_am)
 );
-CREATE TABLE PERSON_FUEHRERSCHEINKLASSE(
-    KlassenKennung VARCHAR(45),
-    seit DATE,
-    PID INTEGER,
-    PRIMARY KEY (KlassenKennung, seit, PID),
-    Bemerkungen VARCHAR(50)
+
+ALTER TABLE Fahrzeuge
+       ADD  ( CONSTRAINT XPKFahrzeuge PRIMARY KEY (KFZ_NR) ) ;
+
+
+
+CREATE TABLE FahrzeugTypen (
+       Typ_ID               	NUMBER(9) NOT NULL,
+       Art_ID               	NUMBER(9) NOT NULL,
+       HID                  	NUMBER(9) NOT NULL,
+       Typ_Bezeichner       	VARCHAR2(20) NOT NULL,
+       Anzahl_Sitze         	NUMBER(3) NULL,
+       Anzahl_Tueren         	NUMBER(2) NULL,
+       zul_Gesamtgewicht    	NUMBER(8,2) NOT NULL,
+       zul_hoechstgeschw    	NUMBER(3) NOT NULL
 );
 
-CREATE TABLE FAHRZEUGTYP_FUERERSCHEINKLASSE(
-    Typ_ID INTEGER,
-    KlassenKennung VARCHAR(45),
-    FOREIGN KEY (Typ_ID) REFERENCES FahrzeugTypen(Typ_ID)    ON DELETE CASCADE,
-    FOREIGN KEY (KlassenKennung) REFERENCES Fuehrerscheinklassen(KlassenKennung) ON DELETE CASCADE
+
+ALTER TABLE FahrzeugTypen
+       ADD  ( CONSTRAINT XPKFahrzeugTypen PRIMARY KEY (Typ_ID) ) ;
+
+
+
+CREATE TABLE Hersteller (
+       HID                  	NUMBER(9) NOT NULL,
+       Hersteller_Name      	VARCHAR2(20) NOT NULL,
+       Adresse              	VARCHAR2(20) NOT NULL
 );
 
--- ALTER TABLE FahrzeugTypen ADD CONSTRAINT fk_FahrzeugArten FOREIGN KEY (Art_ID) REFERENCES FAHRZEUGARTEN(Art_ID) ON DELETE CASCADE ;
-ALTER TABLE FahrzeugTypen ADD CONSTRAINT fk_FahrzeugArten FOREIGN KEY (Art_ID) REFERENCES FAHRZEUGARTEN(Art_ID) ON DELETE SET NULL ;
-ALTER TABLE FahrzeugTypen ADD CONSTRAINT fk_Hersteller FOREIGN KEY (HID) REFERENCES Hersteller(HID) ON DELETE CASCADE ;
-ALTER TABLE Fahrzeuge ADD CONSTRAINT fk_FahrzeugTypen FOREIGN KEY (Typ_ID) REFERENCES FahrzeugTypen(Typ_ID) ON DELETE CASCADE;
---     ALTER TABLE Vorbestellungen ADD CONSTRAINT fk_Kunden FOREIGN KEY (PID) REFERENCES Kunden(PID) ON DELETE SET NULL ;
-    ALTER TABLE Vorbestellungen ADD CONSTRAINT fk_Kunden FOREIGN KEY (PID) REFERENCES Kunden(PID) ON DELETE CASCADE ;
-ALTER TABLE Vorbestellungen ADD CONSTRAINT fk_Fahrzeuge FOREIGN KEY (KFZ_NR) REFERENCES Fahrzeuge(KFZ_NR) ON DELETE CASCADE ;
-ALTER TABLE Ausleihen ADD CONSTRAINT fk_Fahrzeuge_Ausleihe FOREIGN KEY (KFZ_NR) REFERENCES Fahrzeuge(KFZ_NR) ON DELETE CASCADE ;
---     ALTER TABLE Ausleihen ADD CONSTRAINT fk_Kunde FOREIGN KEY (PID) REFERENCES Kunden(PID) ON DELETE SET NULL ;
-    ALTER TABLE Ausleihen ADD CONSTRAINT fk_Kunde FOREIGN KEY (PID) REFERENCES Kunden(PID) ON DELETE CASCADE ;
---     ALTER TABLE Ausleihen ADD CONSTRAINT fk_Vorbestellungen FOREIGN KEY (VID) REFERENCES Vorbestellungen(VID) ON DELETE CASCADE ;
-    ALTER TABLE Ausleihen ADD CONSTRAINT fk_Vorbestellungen FOREIGN KEY (VID) REFERENCES Vorbestellungen(VID) ON DELETE SET NULL ;
-ALTER TABLE Person_Fuehrerscheinklasse ADD CONSTRAINT fk_Fuehrerscheinklassen FOREIGN KEY (KlassenKennung) REFERENCES Fuehrerscheinklassen(KlassenKennung) ON DELETE CASCADE ;
---     ALTER TABLE Person_Fuehrerscheinklasse ADD CONSTRAINT fk_Kunden_PID FOREIGN KEY (PID) REFERENCES Kunden(PID) ON DELETE SET NULL ;
-    ALTER TABLE Person_Fuehrerscheinklasse ADD CONSTRAINT fk_Kunden_PID FOREIGN KEY (PID) REFERENCES Kunden(PID) ON DELETE CASCADE ;
 
-CREATE SEQUENCE FAHRZEUG_SEQ MINVALUE 0 START WITH 1 INCREMENT BY 1 CACHE 20;
-CREATE SEQUENCE FAHRZEUGTYP_SEQ MINVALUE 0 START WITH 1 INCREMENT BY 1 CACHE 20;
-CREATE SEQUENCE FAHRZEUGART_SEQ MINVALUE 0 START WITH 1 INCREMENT BY 1 CACHE 20;
-CREATE SEQUENCE HERSTELLER_SEQ MINVALUE 0 START WITH 1 INCREMENT BY 1 CACHE 20;
-CREATE SEQUENCE KUNDE_SEQ MINVALUE 0 START WITH 1 INCREMENT BY 1 CACHE 20;
-CREATE SEQUENCE VORBESTELLUNG_SEQ MINVALUE 0 START WITH 1 INCREMENT BY 1 CACHE 20;
-
-
-INSERT INTO HERSTELLER(hid, hersteller_name, adresse) VALUES (HERSTELLER_SEQ.nextval,'Audi','Ingelheim');
-INSERT INTO HERSTELLER(hid, hersteller_name, adresse) VALUES (HERSTELLER_SEQ.nextval,'Merceds Benz','Stuttgart');
-INSERT INTO HERSTELLER(hid, hersteller_name, adresse) VALUES (HERSTELLER_SEQ.nextval,'VW','Wolfsburg');
-INSERT INTO HERSTELLER(hid, hersteller_name, adresse) VALUES (HERSTELLER_SEQ.nextval,'Ford','Köln');
-INSERT INTO HERSTELLER(hid, hersteller_name, adresse) VALUES (HERSTELLER_SEQ.nextval,'Opel','Rüsselsheim');
-
-
-INSERT INTO KUNDEN(PID, Name, Strasse, Ort, PLZ, Kontonummer, BLZ)
-    VALUES (KUNDE_SEQ.nextval, 'Meier, Hugo', 'Bremsweg 13', 'Braushausen', 36909, 1245780, 37010050);
-INSERT INTO KUNDEN(PID, Name, Strasse, Ort, PLZ, Kontonummer, BLZ)
-    VALUES (KUNDE_SEQ.nextval, 'Müller, Erna', 'Kriechspur 67', 'Kruvlingen', 43677, 167894, 27726699);
-INSERT INTO KUNDEN(PID, Name, Strasse, Ort, PLZ, Kontonummer, BLZ)
-    VALUES (KUNDE_SEQ.nextval, 'Schmidchen, Anton', 'Tempoweg 122', 'Fahrten', 19556, 9744223, 7654321);
-INSERT INTO KUNDEN(PID, Name, Strasse, Ort, PLZ, Kontonummer, BLZ)
-    VALUES (KUNDE_SEQ.nextval, 'Bäcker, Emma', 'Fahrgasse 43', 'Stoppheim', 45889, 987655, 1234567);
-INSERT INTO KUNDEN(PID, Name, Strasse, Ort, PLZ, Kontonummer, BLZ)
-    VALUES (KUNDE_SEQ.nextval, 'Bäcker, Hugo', 'Fahrgasse 43', 'Stoppheim', 45889, NULL, NULL);
-
-
-INSERT INTO FAHRZEUGARTEN(Art_ID, Art_Bezeichner) VALUES (FAHRZEUGART_SEQ.nextval, 'Limousine');
-INSERT INTO FAHRZEUGARTEN(Art_ID, Art_Bezeichner) VALUES (FAHRZEUGART_SEQ.nextval, 'Cabrio');
-INSERT INTO FAHRZEUGARTEN(Art_ID, Art_Bezeichner) VALUES (FAHRZEUGART_SEQ.nextval, 'Combi');
-INSERT INTO FAHRZEUGARTEN(Art_ID, Art_Bezeichner) VALUES (FAHRZEUGART_SEQ.nextval, 'KRAD');
-INSERT INTO FAHRZEUGARTEN(Art_ID, Art_Bezeichner) VALUES (FAHRZEUGART_SEQ.nextval, 'Leichtkrad');
-INSERT INTO FAHRZEUGARTEN(Art_ID, Art_Bezeichner) VALUES (FAHRZEUGART_SEQ.nextval, 'LKW');
-
-INSERT INTO FAHRZEUGTYPEN(Typ_ID, Art_ID, HID, Typ_Bezeichner, Anzahl_Sitze, Anzahl_Tueren, zul_Gesamtgewicht, zul_hoechstgeschw)
-    VALUES (FAHRZEUGTYP_SEQ.nextval, 3, 1, 'A4 Avant', 5, 5, 1500, 205);
-INSERT INTO FAHRZEUGTYPEN(Typ_ID, Art_ID, HID, Typ_Bezeichner, Anzahl_Sitze, Anzahl_Tueren, zul_Gesamtgewicht, zul_hoechstgeschw)
-    VALUES (FAHRZEUGTYP_SEQ.nextval, 2, 2, 'SLK 200', 4, 2, 1200, 225);
-INSERT INTO FAHRZEUGTYPEN(Typ_ID, Art_ID, HID, Typ_Bezeichner, Anzahl_Sitze, Anzahl_Tueren, zul_Gesamtgewicht, zul_hoechstgeschw)
-    VALUES (FAHRZEUGTYP_SEQ.nextval, 1, 1, 'A3', 5, 3, 1100, 198);
-INSERT INTO FAHRZEUGTYPEN(Typ_ID, Art_ID, HID, Typ_Bezeichner, Anzahl_Sitze, Anzahl_Tueren, zul_Gesamtgewicht, zul_hoechstgeschw)
-    VALUES (FAHRZEUGTYP_SEQ.nextval, 1, 3, 'Golf', 5, 3, 1150, 202);
-INSERT INTO FAHRZEUGTYPEN(Typ_ID, Art_ID, HID, Typ_Bezeichner, Anzahl_Sitze, Anzahl_Tueren, zul_Gesamtgewicht, zul_hoechstgeschw)
-    VALUES (FAHRZEUGTYP_SEQ.nextval, 1, 4, 'Focus', 5, 3, 1080, 185);
-
-
-INSERT INTO FAHRZEUGE(KFZ_NR, Typ_ID, Preis_pro_Tag, Nummernschild, gelaufene_KM, naechste_HU, naechste_ASU, Farbe, Klimaanlage, angemeldet_am, abgemeldet_am)
-    VALUES (1296833, 1, 98, 'GM-AL 455', 123450, SYSDATE+100, SYSDATE+100, 'silber', 'JA. Automatisch', SYSDATE-10, NULL );
-INSERT INTO FAHRZEUGE(KFZ_NR, Typ_ID, Preis_pro_Tag, Nummernschild, gelaufene_KM, naechste_HU, naechste_ASU, Farbe, Klimaanlage, angemeldet_am, abgemeldet_am)
-    VALUES (2334556, 2, 139, 'GM-HG 34', 160000, SYSDATE+120, SYSDATE+120, 'silber', 'JA. Automatish', SYSDATE-90, NULL );
-INSERT INTO FAHRZEUGE(KFZ_NR, Typ_ID, Preis_pro_Tag, Nummernschild, gelaufene_KM, naechste_HU, naechste_ASU, Farbe, Klimaanlage, angemeldet_am, abgemeldet_am)
-    VALUES (9998767, 3, 56, 'RS-JK 980', 120000, SYSDATE-30, SYSDATE-30, 'gelb', 'JA. Manuel', SYSDATE-160, SYSDATE );
-INSERT INTO FAHRZEUGE(KFZ_NR, Typ_ID, Preis_pro_Tag, Nummernschild, gelaufene_KM, naechste_HU, naechste_ASU, Farbe, Klimaanlage, angemeldet_am, abgemeldet_am)
-    VALUES (4567673, 4, 37, 'K-LM 2344', 135000, SYSDATE+55, SYSDATE+55, 'blau', 'NEIN', SYSDATE-200, NULL );
-INSERT INTO FAHRZEUGE(KFZ_NR, Typ_ID, Preis_pro_Tag, Nummernschild, gelaufene_KM, naechste_HU, naechste_ASU, Farbe, Klimaanlage, angemeldet_am, abgemeldet_am)
-    VALUES (8968585, 5, 39, 'GM-LO 780', 89000, SYSDATE+10, SYSDATE+10, 'rot', 'NEIN', SYSDATE-300, NULL );
-INSERT INTO FAHRZEUGE(KFZ_NR, Typ_ID, Preis_pro_Tag, Nummernschild, gelaufene_KM, naechste_HU, naechste_ASU, Farbe, Klimaanlage, angemeldet_am, abgemeldet_am)
-    VALUES (5696833, 1, 108, 'GM-LB 155', 123450, SYSDATE+100, SYSDATE+100, 'silber', 'JA. Automatisch', SYSDATE-10, NULL );
-INSERT INTO FAHRZEUGE(KFZ_NR, Typ_ID, Preis_pro_Tag, Nummernschild, gelaufene_KM, naechste_HU, naechste_ASU, Farbe, Klimaanlage, angemeldet_am, abgemeldet_am)
-    VALUES (7834556, 2, 119, 'GL-HF 324', 160000, SYSDATE+120, SYSDATE+120, 'silber', 'JA. Manuel', SYSDATE-90, NULL );
-INSERT INTO FAHRZEUGE(KFZ_NR, Typ_ID, Preis_pro_Tag, Nummernschild, gelaufene_KM, naechste_HU, naechste_ASU, Farbe, Klimaanlage, angemeldet_am, abgemeldet_am)
-    VALUES (4498767, 3, 66, 'RS-ID 850', 120000, SYSDATE-30, SYSDATE-30, 'gelb', 'JA. Manuel', SYSDATE-160, SYSDATE );
-INSERT INTO FAHRZEUGE(KFZ_NR, Typ_ID, Preis_pro_Tag, Nummernschild, gelaufene_KM, naechste_HU, naechste_ASU, Farbe, Klimaanlage, angemeldet_am, abgemeldet_am)
-    VALUES (2367673, 4, 57, 'K-DT 1244', 135000, SYSDATE+55, SYSDATE+55, 'blau', 'NEIN', SYSDATE-200, NULL );
-INSERT INTO FAHRZEUGE(KFZ_NR, Typ_ID, Preis_pro_Tag, Nummernschild, gelaufene_KM, naechste_HU, naechste_ASU, Farbe, Klimaanlage, angemeldet_am, abgemeldet_am)
-    VALUES (4568585, 5, 59, 'GL-LR 180', 89000, SYSDATE+10, SYSDATE+10, 'rot', 'NEIN', SYSDATE-300, NULL );
-
-
-INSERT INTO VORBESTELLUNGEN(VID, PID, KFZ_NR, von, bis) VALUES (VORBESTELLUNG_SEQ.nextval, 1, 2334556, SYSDATE-52, SYSDATE-50);
-INSERT INTO VORBESTELLUNGEN(VID, PID, KFZ_NR, von, bis) VALUES (VORBESTELLUNG_SEQ.nextval, 2, 9998767, SYSDATE-30, SYSDATE-29);
-INSERT INTO VORBESTELLUNGEN(VID, PID, KFZ_NR, von, bis) VALUES (VORBESTELLUNG_SEQ.nextval, 3, 1296833, SYSDATE-12, SYSDATE-12);
-INSERT INTO VORBESTELLUNGEN(VID, PID, KFZ_NR, von, bis) VALUES (VORBESTELLUNG_SEQ.nextval, 4, 8968585, SYSDATE-3, SYSDATE+5);
-INSERT INTO VORBESTELLUNGEN(VID, PID, KFZ_NR, von, bis) VALUES (VORBESTELLUNG_SEQ.nextval, 3, 1296833, SYSDATE-1, SYSDATE+2);
-INSERT INTO VORBESTELLUNGEN(VID, PID, KFZ_NR, von, bis) VALUES (VORBESTELLUNG_SEQ.nextval, 1, 7834556, SYSDATE+3, SYSDATE+7);
-INSERT INTO VORBESTELLUNGEN(VID, PID, KFZ_NR, von, bis) VALUES (VORBESTELLUNG_SEQ.nextval, 2, 2334556, SYSDATE+10, SYSDATE+13);
-INSERT INTO VORBESTELLUNGEN(VID, PID, KFZ_NR, von, bis) VALUES (VORBESTELLUNG_SEQ.nextval, 3, 5696833, SYSDATE+11, SYSDATE+12);
-INSERT INTO VORBESTELLUNGEN(VID, PID, KFZ_NR, von, bis) VALUES (VORBESTELLUNG_SEQ.nextval, 4, 4567673, SYSDATE+20, SYSDATE+21);
-INSERT INTO VORBESTELLUNGEN(VID, PID, KFZ_NR, von, bis) VALUES (VORBESTELLUNG_SEQ.nextval, 2, 7834556, SYSDATE+22, SYSDATE+22);
-INSERT INTO VORBESTELLUNGEN(VID, PID, KFZ_NR, von, bis) VALUES (VORBESTELLUNG_SEQ.nextval, 1, 4498767, SYSDATE, SYSDATE+1);
-INSERT INTO VORBESTELLUNGEN(VID, PID, KFZ_NR, von, bis) VALUES (VORBESTELLUNG_SEQ.nextval, 2, 2367673, SYSDATE, SYSDATE+2);
-
-
-INSERT INTO AUSLEIHEN(von, bis, KFZ_NR, PID, VID) VALUES (SYSDATE-52, SYSDATE-49, 2334556, 1, 1);
-INSERT INTO AUSLEIHEN(von, bis, KFZ_NR, PID, VID) VALUES (SYSDATE-30, SYSDATE-29, 9998767, 2, 2);
-INSERT INTO AUSLEIHEN(von, bis, KFZ_NR, PID, VID) VALUES (SYSDATE-14, SYSDATE-12, 4498767, 1, NULL);
-INSERT INTO AUSLEIHEN(von, bis, KFZ_NR, PID, VID) VALUES (SYSDATE-19, SYSDATE-17, 4498767, 3, NULL);
-INSERT INTO AUSLEIHEN(von, bis, KFZ_NR, PID, VID) VALUES (SYSDATE-16, SYSDATE-16, 7834556, 2, NULL);
-INSERT INTO AUSLEIHEN(von, bis, KFZ_NR, PID, VID) VALUES (SYSDATE-12, SYSDATE-12, 1296833, 3, 3);
-INSERT INTO AUSLEIHEN(von, bis, KFZ_NR, PID, VID) VALUES (SYSDATE-1, SYSDATE+3, 1296833, 3, 5);
-INSERT INTO AUSLEIHEN(von, bis, KFZ_NR, PID, VID) VALUES (SYSDATE-13, SYSDATE-11, 8968585, 2, NULL);
-INSERT INTO AUSLEIHEN(von, bis, KFZ_NR, PID, VID) VALUES (SYSDATE-3, SYSDATE+4, 8968585, 4, 4);
-INSERT INTO AUSLEIHEN(von, bis, KFZ_NR, PID, VID) VALUES (SYSDATE-8, SYSDATE-5, 2367673, 1, NULL);
-INSERT INTO AUSLEIHEN(von, bis, KFZ_NR, PID, VID) VALUES (SYSDATE, SYSDATE+1, 4498767, 1, 11);
-INSERT INTO AUSLEIHEN(von, bis, KFZ_NR, PID, VID) VALUES (SYSDATE, SYSDATE+2, 2367673, 2, 12);
-INSERT INTO AUSLEIHEN(von, bis, KFZ_NR, PID, VID) VALUES (SYSDATE, SYSDATE+3, 7834556, 3, NULL);
-INSERT INTO AUSLEIHEN(von, bis, KFZ_NR, PID, VID) VALUES (SYSDATE, SYSDATE+2, 5696833, 4, NULL);
-INSERT INTO AUSLEIHEN(von, bis, KFZ_NR, PID, VID) VALUES (SYSDATE, SYSDATE+1, 1296833, 1, NULL);
-
-INSERT INTO FUEHRERSCHEINKLASSEN(KlassenKennung, Klassenbezeichnung, Beschreibung) VALUES ('A1', 'Leichtkrafträder', NULL);
-INSERT INTO FUEHRERSCHEINKLASSEN(KlassenKennung, Klassenbezeichnung, Beschreibung) VALUES ('A', 'Motorräder', NULL);
-INSERT INTO FUEHRERSCHEINKLASSEN(KlassenKennung, Klassenbezeichnung, Beschreibung) VALUES ('M', 'Mofa', 'bla');
-INSERT INTO FUEHRERSCHEINKLASSEN(KlassenKennung, Klassenbezeichnung, Beschreibung) VALUES ('C1', 'Klein-LKW', NULL);
-INSERT INTO FUEHRERSCHEINKLASSEN(KlassenKennung, Klassenbezeichnung, Beschreibung) VALUES ('C', 'Gross-LKW', NULL);
-INSERT INTO FUEHRERSCHEINKLASSEN(KlassenKennung, Klassenbezeichnung, Beschreibung) VALUES ('B', 'PKW', 'blupp');
-INSERT INTO FUEHRERSCHEINKLASSEN(KlassenKennung, Klassenbezeichnung, Beschreibung) VALUES ('BE', 'PKW mit Anhänger', NULL);
-
-
-INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('B', SYSDATE-100, 1, NULL);
-INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('B', SYSDATE-200, 2, NULL);
-INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('B', SYSDATE-300, 3, NULL);
-INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('B', SYSDATE-400, 4, NULL);
-INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('A', SYSDATE-100, 1, NULL);
-INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('A', SYSDATE-150, 2, NULL);
-INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('BE',SYSDATE-300, 2, NULL);
-INSERT INTO PERSON_FUEHRERSCHEINKLASSE(KlassenKennung, seit, PID, Bemerkungen) VALUES ('BE',SYSDATE-250, 3, NULL);
-
-
-INSERT INTO FAHRZEUGTYP_FUERERSCHEINKLASSE(Typ_ID, KlassenKennung) VALUES (1, 'B');
-INSERT INTO FAHRZEUGTYP_FUERERSCHEINKLASSE(Typ_ID, KlassenKennung) VALUES (2, 'B');
-INSERT INTO FAHRZEUGTYP_FUERERSCHEINKLASSE(Typ_ID, KlassenKennung) VALUES (3, 'B');
-INSERT INTO FAHRZEUGTYP_FUERERSCHEINKLASSE(Typ_ID, KlassenKennung) VALUES (4, 'B');
-INSERT INTO FAHRZEUGTYP_FUERERSCHEINKLASSE(Typ_ID, KlassenKennung) VALUES (5, 'B');
-INSERT INTO FAHRZEUGTYP_FUERERSCHEINKLASSE(Typ_ID, KlassenKennung) VALUES (1, 'BE');
-INSERT INTO FAHRZEUGTYP_FUERERSCHEINKLASSE(Typ_ID, KlassenKennung) VALUES (2, 'BE');
-INSERT INTO FAHRZEUGTYP_FUERERSCHEINKLASSE(Typ_ID, KlassenKennung) VALUES (3, 'BE');
-INSERT INTO FAHRZEUGTYP_FUERERSCHEINKLASSE(Typ_ID, KlassenKennung) VALUES (4, 'BE');
-INSERT INTO FAHRZEUGTYP_FUERERSCHEINKLASSE(Typ_ID, KlassenKennung) VALUES (5, 'BE');
-
-CREATE INDEX Ausleihen_Index ON Ausleihen(bis);
-
-                                    -- AUFGABE 1.A
--- INSERT INTO KUNDEN(PID, Name, Strasse, Ort, PLZ, Kontonummer, BLZ)
---     VALUES (KUNDE_SEQ.nextval, 'Test 1', 'TestStrasse', 'TestOrt', 111,111,111);
--- SELECT * FROM KUNDEN;
--- DELETE FROM KUNDEN WHERE PID = 6;
--- SELECT * FROM KUNDEN;
-
-
-
-                                    -- AUFGABE B
--- ALTER TABLE HERSTELLER ADD CONSTRAINT adresse_check CHECK ( ADRESSE IS NOT NULL );
--- INSERT INTO HERSTELLER(hid, hersteller_name, adresse)
---     VALUES(9, 'TestAuto', '');
--- DELETE FROM HERSTELLER WHERE HID > 5;
--- SELECT * FROM HERSTELLER;
-
-                                    -- AUFGABE 1.C
--- kann nicht set null verwenden, da PK kann nicht = 0 sein, deswegen nur delete cascade
---     SELECT * FROM AUSLEIHEN;
---     SELECT * FROM VORBESTELLUNGEN;
---     SELECT * FROM KUNDEN;
---     DELETE FROM KUNDEN WHERE PID=1;
-
-                                    -- AUFGABE 1.D
--- SELECT * FROM AUSLEIHEN;
--- DELETE FROM VORBESTELLUNGEN WHERE VID = 1;
-
-                                    -- AUFGABE 1.E
--- bei ORACLE nur SET NULL oder CASCADE
--- SELECT * FROM FAHRZEUGTYPEN;
--- SELECT * FROM FAHRZEUGARTEN;
--- DELETE FROM FAHRZEUGARTEN WHERE ART_ID = 3;
-
-                                    -- AUFGABE 1.F
--- INSERT INTO FUEHRERSCHEINKLASSEN(klassenkennung, klassenbezeichnung, beschreibung)
---     VALUES ('T', 'blup', '');
--- SELECT * FROM FUEHRERSCHEINKLASSEN;
--- DELETE FROM FUEHRERSCHEINKLASSEN WHERE KLASSENBEZEICHNUNG = 'blup';
---         SELECT * FROM FUEHRERSCHEINKLASSEN WHERE KlassenKennung = UPPER('a1') ;
-
-                                    -- AUFGABE 1.G
--- INSERT INTO VORBESTELLUNGEN(VID, PID, KFZ_NR, von, bis) VALUES (14, 2, 2367673, SYSDATE+3, SYSDATE+2);
--- SELECT * FROM VORBESTELLUNGEN;
--- DELETE FROM VORBESTELLUNGEN WHERE VID > 12;
--- ALTER TABLE VORBESTELLUNGEN ADD CONSTRAINT check_date CHECK ( von <= bis );
-
-                                    -- AUFGABE 1.H
--- kann nicht in CHECK 2 tabelle zusammen verbinden
+ALTER TABLE Hersteller
+       ADD  ( CONSTRAINT XPKHersteller PRIMARY KEY (HID) ) ;
 
 
 
 
-                                -- OPTIONALLE AUFGABEN
-
--- ALTER TABLE AUSLEIHEN ADD CONSTRAINT date_chq CHECK ( von > bis);
--- ALTER TABLE AUSLEIHEN ADD CONSTRAINT check_ausleihe_vorbestellung CHECK ( von > (SELECT bis FROM Vorbestellungen WHERE VID=(SELECT MAX(VID) FROM Vorbestellungen)));
-
-
--- INSERT INTO HERSTELLER(hid, hersteller_name, adresse) VALUES (HERSTELLER_SEQ.nextval,'Auto 4','Stutgart');
--- INSERT INTO KUNDEN(PID, Name, Strasse, Ort, PLZ, Kontonummer, BLZ) VALUES (KUNDE_SEQ.nextval, 'Name 4', 'Strasse 4', 'Ort 4', 4, 44, 444);
--- INSERT INTO FAHRZEUGARTEN(Art_ID, Art_Bezeichner) VALUES (FAHRZEUGART_SEQ.nextval, 'Gelendwagen');
--- INSERT INTO FAHRZEUGTYPEN(Typ_ID, Art_ID, HID, Typ_Bezeichner, Anzahl_Sitze, Anzahl_Tueren, zul_Gesamtgewicht, zul_hoechstgeschw)
---     VALUES (FAHRZEUGTYP_SEQ.nextval, 4, 4, 'Typ 4', 4, 4, 4000, 4400);
--- INSERT INTO FAHRZEUGE(KFZ_NR, Typ_ID, Preis_pro_Tag, Nummernschild, gelaufene_KM, naechste_HU, naechste_ASU, Farbe, Klimaanlage, angemeldet_am, abgemeldet_am)
---     VALUES (FAHRZEUG_SEQ.nextval, 4, 400, 44444, 444, '04.01.2001', '05.01.2001', 'Schwarz', 'Ja', '', '05.01.2001' );
--- INSERT INTO VORBESTELLUNGEN(VID, PID, KFZ_NR, von, bis) VALUES (VORBESTELLUNG_SEQ.nextval, 4, 4, '08.01.2001', '09.01.2001');
--- INSERT INTO AUSLEIHEN(von, bis, KFZ_NR, PID, VID) VALUES ('06.01.2001', '07.01.2001', 4, 4, 4);
+CREATE TABLE FahrzeugArten (
+       Art_ID               	NUMBER(9) NOT NULL,
+       Art_Bezeichner       	VARCHAR2(20) NOT NULL
+);
 
 
-                                    -- AUFGABE 2.A
--- SELECT KFZ_NR, Nummernschild, Typ_Bezeichner, Anzahl_Tueren FROM FAHRZEUGE, FAHRZEUGTYPEN WHERE angemeldet_am IS NOT NULL AND Anzahl_Tueren > 2;
-
-                                    -- AUFGABE 2.B UNKLAR
-
-
-                                    -- AUFGABE 2.C
--- SELECT KFZ_NR, Nummernschild FROM FAHRZEUGE, FAHRZEUGTYPEN WHERE angemeldet_am IS NULL;
-
-                                    -- AUFGABE 2.D
-SELECT Kunden.PID, Kunden.Name, COUNT(*) over ()
-FROM Kunden
-INNER JOIN Person_Fuehrerscheinklasse on Person_Fuehrerscheinklasse.PID = Kunden.PID
-WHERE KlassenKennung IN ('A1', 'A', 'M', 'C1', 'C', 'B', 'BE' )
-GROUP BY Kunden.PID, Kunden.Name HAVING COUNT(Kunden.PID) = 8;
+ALTER TABLE FahrzeugArten
+       ADD  ( CONSTRAINT XPKFahrzeugArten PRIMARY KEY (Art_ID) ) ;
 
 
 
+CREATE TABLE Kunden (
+       PID                  NUMBER(9) NOT NULL,
+       Name               VARCHAR2(50) NOT NULL,
+       Strasse            VARCHAR2(50) NOT NULL,
+       Ort                   VARCHAR2(50) NOT NULL,
+       PLZ                  NUMBER(8) NOT NULL,
+       Kontonummer   NUMBER(12) NULL,
+       BLZ                  NUMBER(8) NULL
+);
 
--- SELECT * FROM KUNDEN;
--- SELECT * FROM AUSLEIHEN;
--- SELECT * FROM VORBESTELLUNGEN;
--- SELECT * FROM PERSON_FUEHRERSCHEINKLASSE;
--- SELECT * FROM Vorbestellungen where VID=(SELECT MAX(VID) FROM Vorbestellungen);
--- SELECT  * FROM FAHRZEUGTYP_FUERERSCHEINKLASSE;
+
+ALTER TABLE Kunden
+       ADD  ( CONSTRAINT XPKKunden PRIMARY KEY (PID) ) ;
+
+
+--- Foreign Keys
+
+ALTER TABLE Fahrzeug_Fuehrerscheinklasse
+       ADD  ( CONSTRAINT R_23
+              FOREIGN KEY (KlassenKennung)
+                             REFERENCES Fuehrerscheinklassen ) ;
+
+
+ALTER TABLE Fahrzeug_Fuehrerscheinklasse
+       ADD  ( CONSTRAINT R_22
+              FOREIGN KEY (Typ_ID)
+                             REFERENCES FahrzeugTypen ) ;
+
+
+ALTER TABLE Person_Fuehrerscheinklasse
+       ADD  ( CONSTRAINT hat_gemacht
+              FOREIGN KEY (PID)
+                             REFERENCES Kunden ) ;
+
+
+ALTER TABLE Person_Fuehrerscheinklasse
+       ADD  ( CONSTRAINT wurde_gemacht
+              FOREIGN KEY (KlassenKennung)
+                             REFERENCES Fuehrerscheinklassen ) ;
+
+ALTER TABLE Ausleihen
+       ADD  ( CONSTRAINT leiht_aus
+              FOREIGN KEY (PID)
+                             REFERENCES Kunden ) ;
+
+
+ALTER TABLE Ausleihen
+       ADD  ( CONSTRAINT wird_ausgeliehen
+              FOREIGN KEY (KFZ_NR)
+                             REFERENCES Fahrzeuge ) ;
+
+
+ALTER TABLE Vorbestellungen
+       ADD  ( CONSTRAINT bestellt_vor
+              FOREIGN KEY (PID)
+                             REFERENCES Kunden ) ;
+
+
+ALTER TABLE Vorbestellungen
+       ADD  ( CONSTRAINT wird_vorbestellt
+              FOREIGN KEY (KFZ_NR)
+                             REFERENCES Fahrzeuge ) ;
+
+
+ALTER TABLE Fahrzeuge
+       ADD  ( CONSTRAINT typ_gilt_fuer
+              FOREIGN KEY (Typ_ID)
+                             REFERENCES FahrzeugTypen ) ;
+
+
+ALTER TABLE FahrzeugTypen
+       ADD  ( CONSTRAINT art_gilt_fuer
+              FOREIGN KEY (Art_ID)
+                             REFERENCES FahrzeugArten ) ;
+
+
+ALTER TABLE FahrzeugTypen
+       ADD  ( CONSTRAINT bietet_an
+              FOREIGN KEY (HID)
+                             REFERENCES Hersteller ) ;
+
+
+---3) Benutzersichten-----------------------------------------------------------------------------------------------------
+
+
+CREATE OR REPLACE VIEW Nichtausleihen_V AS
+       SELECT FahrzeugTypen.Typ_Bezeichner, Fahrzeuge.Nummernschild
+       FROM Fahrzeuge, FahrzeugTypen
+       WHERE          fahrzeuge.typ_id = fahrzeugtypen.typ_id
+AND fahrzeuge.kfz_nr NOT IN (SELECT DISTINCT kfz_nr FROM ausleihen
+                             UNION
+                             SELECT DISTINCT kfz_nr FROM vorbestellungen)
+;
+
+
+CREATE OR REPLACE VIEW Ausleihen_V AS
+       SELECT Kunden.PLZ, Kunden.Ort, FahrzeugArten.Art_Bezeichner, FahrzeugTypen.Typ_Bezeichner, Kunden.Name, Vorbestellungen.VID
+       FROM Ausleihen, Kunden, Fahrzeuge, FahrzeugArten, FahrzeugTypen, Vorbestellungen
+       WHERE ausleihen.kfz_nr       = fahrzeuge.kfz_nr
+       AND fahrzeuge.typ_id         = fahrzeugtypen.typ_id
+       AND fahrzeugarten.art_id     = fahrzeugtypen.art_id
+       AND ausleihen.pid            = kunden.pid
+       AND ausleihen.vid            = vorbestellungen.vid (+)
+;
+
+------- 4) Sequenz und Zweitschlüssel------------------------------------------------------
+
+
+CREATE INDEX XIF12Ausleihen ON Ausleihen
+(
+       KFZ_NR                         ASC
+);
+
+CREATE INDEX XIF14Ausleihen ON Ausleihen
+(
+       PID                            ASC
+);
+
+CREATE INDEX XIF16Ausleihen ON Ausleihen
+(
+       VID                            ASC
+);
+
+--  Datenbestand
+
+INSERT INTO fahrzeugarten VALUES (1,'Limousine');
+INSERT INTO fahrzeugarten VALUES (2,'Cabrio');
+INSERT INTO fahrzeugarten VALUES (3,'Combi');
+INSERT INTO fahrzeugarten VALUES (4,'KRAD');
+INSERT INTO fahrzeugarten VALUES (5,'Leichtkrad');
+INSERT INTO fahrzeugarten VALUES (6,'LKW');
+COMMIT;
+
+INSERT INTO hersteller VALUES (1,'Audi','Ingelheim');
+INSERT INTO hersteller VALUES (2,'Merceds Benz','Stuttgart');
+INSERT INTO hersteller VALUES (3,'VW','Wolfsburg');
+INSERT INTO hersteller VALUES (4,'Ford','K�ln');
+INSERT INTO hersteller VALUES (5,'Opel','R�sselsheim');
+COMMIT;
+
+INSERT INTO fahrzeugtypen VALUES (1,3,1,'A4 Avant',5,5,1500,205);
+INSERT INTO fahrzeugtypen VALUES (2,2,2,'SLK 200',4,2,1200,225);
+INSERT INTO fahrzeugtypen VALUES (3,1,1,'A3',5,3,1100,198);
+INSERT INTO fahrzeugtypen VALUES (4,1,3,'Golf',5,3,1150,202);
+INSERT INTO fahrzeugtypen VALUES (5,1,4,'Focus',5,3,1080,185);
+INSERT INTO fahrzeugtypen VALUES (6,3,4,'Vektra',5,3,1996,200);
+COMMIT;
+
+INSERT INTO fuehrerscheinklassen VALUES ('A1','Leichtkraftr�der',NULL);
+INSERT INTO fuehrerscheinklassen VALUES ('A','Motorr�der',NULL);
+INSERT INTO fuehrerscheinklassen VALUES ('M','Mofa','bla');
+INSERT INTO fuehrerscheinklassen VALUES ('C1','Klein-LKW',NULL);
+INSERT INTO fuehrerscheinklassen VALUES ('C','Gross-LKW',NULL);
+INSERT INTO fuehrerscheinklassen VALUES ('B','PKW','blupp');
+INSERT INTO fuehrerscheinklassen VALUES ('BE','PKW mit Anh�nger',NULL);
+COMMIT;
+
+INSERT INTO Fahrzeug_Fuehrerscheinklasse VALUES (1,'B');
+INSERT INTO Fahrzeug_Fuehrerscheinklasse VALUES (2,'B');
+INSERT INTO Fahrzeug_Fuehrerscheinklasse VALUES (3,'B');
+INSERT INTO Fahrzeug_Fuehrerscheinklasse VALUES (4,'B');
+INSERT INTO Fahrzeug_Fuehrerscheinklasse VALUES (5,'B');
+INSERT INTO Fahrzeug_Fuehrerscheinklasse VALUES (1,'BE');
+INSERT INTO Fahrzeug_Fuehrerscheinklasse VALUES (2,'BE');
+INSERT INTO Fahrzeug_Fuehrerscheinklasse VALUES (3,'BE');
+INSERT INTO Fahrzeug_Fuehrerscheinklasse VALUES (4,'BE');
+INSERT INTO Fahrzeug_Fuehrerscheinklasse VALUES (5,'BE');
+INSERT INTO Fahrzeug_Fuehrerscheinklasse VALUES (6,'C');
+INSERT INTO Fahrzeug_Fuehrerscheinklasse VALUES (6,'C1');
+COMMIT;
+
+INSERT INTO kunden VALUES (1,'Meier, Hugo','Bremsweg 13','Braushausen',36909,01245780,37010050);
+INSERT INTO kunden VALUES (2,'M�ller, Erna','Kriechspur 67','Kruvlingen',43677,0167894,27726699);
+INSERT INTO kunden VALUES (3,'Schmidchen, Anton','Tempoweg 122','Fahrten',19556,09744223,7654321);
+INSERT INTO kunden VALUES (4,'B�cker, Emma','Fahrgasse 43','Stoppheim',45889,0987655,1234567);
+INSERT INTO kunden VALUES (5,'B�cker, Hugo','Fahrgasse 43','Stoppheim',45889,NULL, NULL);
+COMMIT;
+
+INSERT INTO person_fuehrerscheinklasse VALUES ('B', 1,SYSDATE-100,NULL);
+INSERT INTO person_fuehrerscheinklasse VALUES ('B', 2,SYSDATE-200,NULL);
+INSERT INTO person_fuehrerscheinklasse VALUES ('B', 4,SYSDATE-400,NULL);
+INSERT INTO person_fuehrerscheinklasse VALUES ('A', 1,SYSDATE-100,NULL);
+INSERT INTO person_fuehrerscheinklasse VALUES ('A', 2,SYSDATE-150,NULL);
+INSERT INTO person_fuehrerscheinklasse VALUES ('BE',2,SYSDATE-300,NULL);
+INSERT INTO person_fuehrerscheinklasse VALUES ('B', 3,SYSDATE-300,NULL);
+INSERT INTO person_fuehrerscheinklasse VALUES ('BE',3,SYSDATE-200,NULL);
+INSERT INTO person_fuehrerscheinklasse VALUES ('A1',3,SYSDATE-250,NULL);
+INSERT INTO person_fuehrerscheinklasse VALUES ('A', 3,SYSDATE-250,NULL);
+INSERT INTO person_fuehrerscheinklasse VALUES ('C1',3,SYSDATE-250,NULL);
+INSERT INTO person_fuehrerscheinklasse VALUES ('C', 3,SYSDATE-250,NULL);
+INSERT INTO person_fuehrerscheinklasse VALUES ('M', 3,SYSDATE-500,NULL);
+COMMIT;
 
 
 
+
+INSERT INTO fahrzeuge VALUES (1296833,1,98,123450,'GM-AL 455',SYSDATE+100,SYSDATE+100,'silber','JA. Automatisch',SYSDATE-10,NULL);
+INSERT INTO fahrzeuge VALUES (2334556,2,139,160000,'GM-HG 34',SYSDATE+120,SYSDATE+120,'silber','JA. Automatisch',SYSDATE-90,NULL);
+INSERT INTO fahrzeuge VALUES (9998767,3,56,152000,'GM-JK 980',SYSDATE-30,SYSDATE-30,'gelb','JA. Manuell',SYSDATE-160,SYSDATE);
+INSERT INTO fahrzeuge VALUES (4567673,4,37,135000,'K-LM 2344',SYSDATE+55,SYSDATE+55,'blau','NEIN',SYSDATE-200,NULL);
+INSERT INTO fahrzeuge VALUES (8968585,5,39,189000,'GM-LO 780',SYSDATE+10,SYSDATE+10,'rot','NEIN',SYSDATE-300,NULL);
+INSERT INTO fahrzeuge VALUES (5696833,1,108,123450,'GM-LB 155',SYSDATE+100,SYSDATE+100,'silber','JA. Automatisch',SYSDATE-10,NULL);
+INSERT INTO fahrzeuge VALUES (7834556,2,119,160000,'GL-HF 324',SYSDATE+120,SYSDATE+120,'silber','JA. Automatisch',SYSDATE-90,NULL);
+INSERT INTO fahrzeuge VALUES (4498767,3,66,120000,'RS-ID 850',SYSDATE-30,SYSDATE-30,'gelb','JA. Manuell',SYSDATE-160,SYSDATE);
+INSERT INTO fahrzeuge VALUES (2367673,4,57,135000,'K-DT 1244',SYSDATE+55,SYSDATE+55,'blau','NEIN',SYSDATE-200,NULL);
+INSERT INTO fahrzeuge VALUES (4568585,5,59,089000,'GL-LR 180',SYSDATE+10,SYSDATE+10,'rot','NEIN',SYSDATE-300,NULL);
+COMMIT;
+
+CREATE SEQUENCE vorb_seq;
+
+INSERT INTO vorbestellungen VALUES (vorb_seq.nextval,1,2334556,SYSDATE-52,SYSDATE-50);
+INSERT INTO vorbestellungen VALUES (vorb_seq.nextval,2,9998767,SYSDATE-30,SYSDATE-29);
+INSERT INTO vorbestellungen VALUES (vorb_seq.nextval,3,1296833,SYSDATE-12,SYSDATE-12);
+INSERT INTO vorbestellungen VALUES (vorb_seq.nextval,4,8968585,SYSDATE-3,SYSDATE+5);
+INSERT INTO vorbestellungen VALUES (vorb_seq.nextval,3,1296833,SYSDATE-1,SYSDATE+2);
+INSERT INTO vorbestellungen VALUES (vorb_seq.nextval,1,7834556,SYSDATE+3,SYSDATE+7);
+INSERT INTO vorbestellungen VALUES (vorb_seq.nextval,2,2334556,SYSDATE+10,SYSDATE+13);
+INSERT INTO vorbestellungen VALUES (vorb_seq.nextval,3,5696833,SYSDATE+11,SYSDATE+12);
+INSERT INTO vorbestellungen VALUES (vorb_seq.nextval,4,4567673,SYSDATE+20,SYSDATE+21);
+INSERT INTO vorbestellungen VALUES (vorb_seq.nextval,2,7834556,SYSDATE+22,SYSDATE+22);
+INSERT INTO vorbestellungen VALUES (vorb_seq.nextval,1,4498767,SYSDATE,SYSDATE+1);
+INSERT INTO vorbestellungen VALUES (vorb_seq.nextval,2,2367673,SYSDATE,SYSDATE+2);
+COMMIT;
+
+
+INSERT INTO ausleihen VALUES (SYSDATE-52,SYSDATE-49,2334556,1,1);
+INSERT INTO ausleihen VALUES (SYSDATE-30,SYSDATE-29,9998767,2,2);
+INSERT INTO ausleihen VALUES (SYSDATE-14,SYSDATE-12,4498767,1,NULL);
+INSERT INTO ausleihen VALUES (SYSDATE-19,SYSDATE-17,4498767,3,NULL);
+INSERT INTO ausleihen VALUES (SYSDATE-16,SYSDATE-16,7834556,2,NULL);
+INSERT INTO ausleihen VALUES (SYSDATE-12,SYSDATE-12,1296833,3,3);
+INSERT INTO ausleihen VALUES (SYSDATE-1,SYSDATE+3,1296833,3,5);
+INSERT INTO ausleihen VALUES (SYSDATE-13,SYSDATE-11,8968585,2,NULL);
+INSERT INTO ausleihen VALUES (SYSDATE-3,SYSDATE+4,8968585,4,4);
+INSERT INTO ausleihen VALUES (SYSDATE-8,SYSDATE-5,2367673,1,NULL);
+INSERT INTO ausleihen VALUES (SYSDATE,SYSDATE+1,4498767,1,11);
+INSERT INTO ausleihen VALUES (SYSDATE,SYSDATE+2,2367673,2,12);
+INSERT INTO ausleihen VALUES (SYSDATE,SYSDATE+3,7834556,3,NULL);
+INSERT INTO ausleihen VALUES (SYSDATE,SYSDATE+2,5696833,4,NULL);
+INSERT INTO ausleihen VALUES (SYSDATE,SYSDATE+1,1296833,1,NULL);
+
+COMMIT;
