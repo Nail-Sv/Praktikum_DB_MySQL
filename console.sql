@@ -328,19 +328,40 @@ INSERT INTO kunden VALUES (4,'B�cker, Emma','Fahrgasse 43','Stoppheim',45889,0
 INSERT INTO kunden VALUES (5,'B�cker, Hugo','Fahrgasse 43','Stoppheim',45889,NULL, NULL);
 COMMIT;
 
-INSERT INTO person_fuehrerscheinklasse VALUES ('B', 1,SYSDATE-100,NULL);
-INSERT INTO person_fuehrerscheinklasse VALUES ('B', 2,SYSDATE-200,NULL);
-INSERT INTO person_fuehrerscheinklasse VALUES ('B', 4,SYSDATE-400,NULL);
-INSERT INTO person_fuehrerscheinklasse VALUES ('A', 1,SYSDATE-100,NULL);
-INSERT INTO person_fuehrerscheinklasse VALUES ('A', 2,SYSDATE-150,NULL);
-INSERT INTO person_fuehrerscheinklasse VALUES ('BE',2,SYSDATE-300,NULL);
-INSERT INTO person_fuehrerscheinklasse VALUES ('B', 3,SYSDATE-300,NULL);
-INSERT INTO person_fuehrerscheinklasse VALUES ('BE',3,SYSDATE-200,NULL);
-INSERT INTO person_fuehrerscheinklasse VALUES ('A1',3,SYSDATE-250,NULL);
-INSERT INTO person_fuehrerscheinklasse VALUES ('A', 3,SYSDATE-250,NULL);
-INSERT INTO person_fuehrerscheinklasse VALUES ('C1',3,SYSDATE-250,NULL);
-INSERT INTO person_fuehrerscheinklasse VALUES ('C', 3,SYSDATE-250,NULL);
-INSERT INTO person_fuehrerscheinklasse VALUES ('M', 3,SYSDATE-500,NULL);
+-- INSERT INTO person_fuehrerscheinklasse VALUES ('B', 1,SYSDATE-100,NULL);
+-- INSERT INTO person_fuehrerscheinklasse VALUES ('B', 2,SYSDATE-200,NULL);
+-- INSERT INTO person_fuehrerscheinklasse VALUES ('B', 4,SYSDATE-400,NULL);
+-- INSERT INTO person_fuehrerscheinklasse VALUES ('A', 1,SYSDATE-100,NULL);
+-- INSERT INTO person_fuehrerscheinklasse VALUES ('A', 2,SYSDATE-150,NULL);
+-- INSERT INTO person_fuehrerscheinklasse VALUES ('BE',2,SYSDATE-300,NULL);
+-- INSERT INTO person_fuehrerscheinklasse VALUES ('B', 3,SYSDATE-300,NULL);
+-- INSERT INTO person_fuehrerscheinklasse VALUES ('BE',3,SYSDATE-200,NULL);
+-- INSERT INTO person_fuehrerscheinklasse VALUES ('A1',3,SYSDATE-250,NULL);
+-- INSERT INTO person_fuehrerscheinklasse VALUES ('A', 3,SYSDATE-250,NULL);
+-- INSERT INTO person_fuehrerscheinklasse VALUES ('C1',3,SYSDATE-250,NULL);
+-- INSERT INTO person_fuehrerscheinklasse VALUES ('C', 3,SYSDATE-250,NULL);
+-- INSERT INTO person_fuehrerscheinklasse VALUES ('M', 3,SYSDATE-500,NULL);
+-- COMMIT;
+-- hier andere Daten aus der Excel Tabelle
+INSERT INTO person_fuehrerscheinklasse VALUES ('B',	1,	SYSDATE-100,    NULL);
+INSERT INTO person_fuehrerscheinklasse VALUES ('B',	2,	SYSDATE-200,	NULL);
+INSERT INTO person_fuehrerscheinklasse VALUES ('B',	3,	SYSDATE-300,	NULL);
+INSERT INTO person_fuehrerscheinklasse VALUES ('B',	4,	SYSDATE-400,	NULL);
+INSERT INTO person_fuehrerscheinklasse VALUES ('A',	1,	SYSDATE-100,	NULL);
+INSERT INTO person_fuehrerscheinklasse VALUES ('A',	2,	SYSDATE-150,	NULL);
+INSERT INTO person_fuehrerscheinklasse VALUES ('BE', 2,	SYSDATE-300,	NULL);
+INSERT INTO person_fuehrerscheinklasse VALUES ('BE', 3,	SYSDATE-250,	NULL);
+INSERT INTO person_fuehrerscheinklasse VALUES ('A1', 2,	SYSDATE-100,	NULL);
+INSERT INTO person_fuehrerscheinklasse VALUES ('M',	 2,	SYSDATE-200,	NULL);
+INSERT INTO person_fuehrerscheinklasse VALUES ('C',  2,	SYSDATE-300,	NULL);
+INSERT INTO person_fuehrerscheinklasse VALUES ('C1', 2,	SYSDATE-400,	NULL);
+INSERT INTO person_fuehrerscheinklasse VALUES ('A1', 5,	SYSDATE-100,	NULL);
+INSERT INTO person_fuehrerscheinklasse VALUES ('A',  5,	SYSDATE-150,    NULL);
+INSERT INTO person_fuehrerscheinklasse VALUES ('M',  5,	SYSDATE-300,    NULL);
+INSERT INTO person_fuehrerscheinklasse VALUES ('C1', 5,	SYSDATE-250,    NULL);
+INSERT INTO person_fuehrerscheinklasse VALUES ('C',  5,	SYSDATE-100,    NULL);
+INSERT INTO person_fuehrerscheinklasse VALUES ('B',  5,	SYSDATE-200,    NULL);
+INSERT INTO person_fuehrerscheinklasse VALUES ('BE', 5, SYSDATE-300,   NULL);
 COMMIT;
 
 
@@ -406,7 +427,7 @@ SELECT KFZ_NR, NUMMERNSCHILD FROM FAHRZEUGE NATURAL JOIN (SELECT KFZ_NR FROM FAH
 -- NOT IN
 SELECT KFZ_NR, NUMMERNSCHILD FROM FAHRZEUGE WHERE KFZ_NR NOT IN (SELECT DISTINCT KFZ_NR FROM AUSLEIHEN);
 
--- NOT EXISTS
+-- NOT EXISTS (division?)
 SELECT KFZ_NR, NUMMERNSCHILD FROM FAHRZEUGE WHERE NOT EXISTS (SELECT * FROM AUSLEIHEN WHERE Ausleihen.KFZ_NR = Fahrzeuge.KFZ_NR);
 
 -- OUTER JOIN ??????????????????
@@ -421,16 +442,10 @@ FROM FAHRZEUGE NATURAL JOIN  VORBESTELLUNGEN NATURAL JOIN (SELECT * FROM FAHRZEU
 
 -- AUFGABE 2.d
 
-SELECT DISTINCT PID, Name, Strasse, PLZ, Ort
-FROM KUNDEN NATURAL JOIN
-(SELECT PERSON_FUEHRERSCHEINKLASSE.Pid, PERSON_FUEHRERSCHEINKLASSE.KlassenKennung
-FROM PERSON_FUEHRERSCHEINKLASSE WHERE  EXISTS (SELECT * FROM Fuehrerscheinklassen
-WHERE Person_Fuehrerscheinklasse.KlassenKennung = Fuehrerscheinklassen.KlassenKennung));
+SELECT a.PID, a.Name, a.Strasse, a.PLZ, a.Ort FROM KUNDEN a
+WHERE NOT EXISTS( SELECT t.KlassenKennung FROM FUEHRERSCHEINKLASSEN t
+WHERE NOT EXISTS(SELECT b.PID, b.KlassenKennung FROM PERSON_FUEHRERSCHEINKLASSE b WHERE a.PID = b.PID AND t.KlassenKennung = b.KLASSENKENNUNG));
 
-SELECT PID, KlassenKennung FROM Person_Fuehrerscheinklasse;
-SELECT * FROM PERSON_FUEHRERSCHEINKLASSE;
-
-
-
-
-SELECT KFZ_NR FROM FAHRZEUGE MINUS SELECT KFZ_NR FROM AUSLEIHEN;
+SELECT DISTINCT PID, Name, Strasse, PLZ, Ort FROM KUNDEN NATURAL JOIN FUEHRERSCHEINKLASSEN
+WHERE NOT EXISTS( SELECT t.KlassenKennung FROM FUEHRERSCHEINKLASSEN t
+WHERE NOT EXISTS(SELECT b.PID, b.KlassenKennung FROM PERSON_FUEHRERSCHEINKLASSE b WHERE Kunden.PID = b.PID AND t.KlassenKennung = b.KLASSENKENNUNG));
