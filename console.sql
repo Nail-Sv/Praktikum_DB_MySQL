@@ -321,11 +321,11 @@ INSERT INTO Fahrzeug_Fuehrerscheinklasse VALUES (6,'C');
 INSERT INTO Fahrzeug_Fuehrerscheinklasse VALUES (6,'C1');
 COMMIT;
 
-INSERT INTO kunden VALUES (1,'Meier, Hugo','Bremsweg 13','Braushausen',36909,01245780,37010050);
-INSERT INTO kunden VALUES (2,'M�ller, Erna','Kriechspur 67','Kruvlingen',43677,0167894,27726699);
-INSERT INTO kunden VALUES (3,'Schmidchen, Anton','Tempoweg 122','Fahrten',19556,09744223,7654321);
-INSERT INTO kunden VALUES (4,'B�cker, Emma','Fahrgasse 43','Stoppheim',45889,0987655,1234567);
-INSERT INTO kunden VALUES (5,'B�cker, Hugo','Fahrgasse 43','Stoppheim',45889,NULL, NULL);
+INSERT INTO kunden VALUES (1,'A.Meier, Hugo','Bremsweg 13','Braushausen',36909,01245780,37010050);
+INSERT INTO kunden VALUES (2,'B.Müller, Erna','Kriechspur 67','Kruvlingen',43677,0167894,27726699);
+INSERT INTO kunden VALUES (3,'C.Schmidchen, Anton','Tempoweg 122','Fahrten',19556,09744223,7654321);
+INSERT INTO kunden VALUES (4,'D.Bäcker, Emma','Fahrgasse 43','Stoppheim',45889,0987655,1234567);
+INSERT INTO kunden VALUES (5,'D.Bäcker, Hugo','Fahrgasse 43','Stoppheim',45889,NULL, NULL);
 COMMIT;
 
 -- INSERT INTO person_fuehrerscheinklasse VALUES ('B', 1,SYSDATE-100,NULL);
@@ -449,3 +449,24 @@ WHERE NOT EXISTS(SELECT b.PID, b.KlassenKennung FROM PERSON_FUEHRERSCHEINKLASSE 
 SELECT DISTINCT PID, Name, Strasse, PLZ, Ort FROM KUNDEN NATURAL JOIN FUEHRERSCHEINKLASSEN
 WHERE NOT EXISTS( SELECT t.KlassenKennung FROM FUEHRERSCHEINKLASSEN t
 WHERE NOT EXISTS(SELECT b.PID, b.KlassenKennung FROM PERSON_FUEHRERSCHEINKLASSE b WHERE Kunden.PID = b.PID AND t.KlassenKennung = b.KLASSENKENNUNG));
+
+
+-- AUFGABE 3.a
+
+SELECT f.KFZ_NR, f.Nummernschild, ft.Typ_Bezeichner FROM FAHRZEUGE f, FAHRZEUGTYPEN ft
+WHERE f.Typ_ID = ft.Typ_ID
+AND ft.Art_ID = 1
+AND f.gelaufene_KM > 150000
+AND f.Nummernschild LIKE 'GM%'
+AND f.naechste_HU < '1.5.2020';
+
+-- AUFGABE 3.b
+-- Welche Kunden haben die meisten Fahrzeuge ausgeliehen? (Anzeige: PID und absteigend sortiert den Namen sowie die maximale Anzahl)
+
+SELECT k.PID, k.Name, count(a.PID)
+FROM  KUNDEN k, AUSLEIHEN a
+WHERE k.PID = a.PID
+GROUP BY a.PID, k.Name, k.PID
+ORDER BY k.Name ASC;
+
+
