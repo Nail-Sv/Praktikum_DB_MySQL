@@ -475,7 +475,6 @@ ORDER BY k.Name ASC;
 Zu diesem Zweck können Sie die SELECT- Klausel erweitern um eine Spalte mit konstantem Wert, der zugleich ein Name gegeben werden kann: SELECT ... , ‘A‘ Status ...*/
 
 SELECT  KFZ_NR, NUMMERNSCHILD FROM FAHRZEUGE NATURAL JOIN (SELECT VID, KFZ_NR FROM VORBESTELLUNGEN UNION SELECT VID, KFZ_NR FROM AUSLEIHEN);
-SELECT  KFZ_NR, NUMMERNSCHILD FROM FAHRZEUGE NATURAL JOIN (SELECT VID, KFZ_NR FROM VORBESTELLUNGEN UNION SELECT VID, KFZ_NR FROM AUSLEIHEN);
 SELECT KFZ_NR, 'V' as Status FROM VORBESTELLUNGEN;
 SELECT KFZ_NR, 'A' as Status FROM AUSLEIHEN;
 SELECT KFZ_NR, 'V' as STatus FROM VORBESTELLUNGEN UNION SELECT KFZ_NR, 'A' as Status FROM AUSLEIHEN;
@@ -491,5 +490,7 @@ Gibt es Fahrzeuge mit dem gleichen Typ_Bezeichner in der Datenbank? Anders ausge
 Es sollen also alle Typ-Bezeichner angezeigt werden, für die es mehrere Fahrzeuge gibt. Anzeige: Typ_Bezeichner, KFZ_Nr.
 Ordnen Sie die Ausgabe nach Typ_Bezeichner absteigend und nach der KFZ_Nr aufsteigend!
 */
+
+
 
 
