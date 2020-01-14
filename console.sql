@@ -432,7 +432,7 @@ SELECT KFZ_NR, NUMMERNSCHILD FROM FAHRZEUGE WHERE NOT EXISTS (SELECT * FROM AUSL
 
 -- OUTER JOIN ??????????????????
 SELECT Fahrzeuge.KFZ_NR, Fahrzeuge.NUMMERNSCHILD FROM FAHRZEUGE
-    left JOIN AUSLEIHEN on (Ausleihen.KFZ_NR = Fahrzeuge.KFZ_NR);
+LEFT JOIN AUSLEIHEN on (Ausleihen.KFZ_NR = Fahrzeuge.KFZ_NR);
 
 
 -- AUFGABE 2.c DISTINCT da ein Auto 2 mal wiederholt
@@ -468,5 +468,28 @@ FROM  KUNDEN k, AUSLEIHEN a
 WHERE k.PID = a.PID
 GROUP BY a.PID, k.Name, k.PID
 ORDER BY k.Name ASC;
+
+-- AUFGABE 3.c
+-- Zeigen Sie alle Fahrzeuge an, die jemals ausgeliehen oder vorbestellt wurden mit deren KFZ-Nr und Nummernschild
+/*Modifizieren Sie die Anfrage 2 a) derart, dass eine dritte Spalte angezeigt wird, die kennzeichnet, ob dieses Fahrzeug vorbestellt (‘V‘) oder ausgeliehen (‘A‘) wurde.
+Zu diesem Zweck können Sie die SELECT- Klausel erweitern um eine Spalte mit konstantem Wert, der zugleich ein Name gegeben werden kann: SELECT ... , ‘A‘ Status ...*/
+
+SELECT  KFZ_NR, NUMMERNSCHILD FROM FAHRZEUGE NATURAL JOIN (SELECT VID, KFZ_NR FROM VORBESTELLUNGEN UNION SELECT VID, KFZ_NR FROM AUSLEIHEN);
+SELECT  KFZ_NR, NUMMERNSCHILD FROM FAHRZEUGE NATURAL JOIN (SELECT VID, KFZ_NR FROM VORBESTELLUNGEN UNION SELECT VID, KFZ_NR FROM AUSLEIHEN);
+SELECT KFZ_NR, 'V' as Status FROM VORBESTELLUNGEN;
+SELECT KFZ_NR, 'A' as Status FROM AUSLEIHEN;
+SELECT KFZ_NR, 'V' as STatus FROM VORBESTELLUNGEN UNION SELECT KFZ_NR, 'A' as Status FROM AUSLEIHEN;
+SELECT KFZ_NR, Nummernschild, Status FROM FAHRZEUGE NATURAL JOIN (
+    SELECT KFZ_NR, 'V' as Status FROM VORBESTELLUNGEN
+    UNION SELECT KFZ_NR, 'A' as Status FROM AUSLEIHEN
+    );
+
+-- AUFGABE 3.d
+/*
+Gibt es Fahrzeuge mit dem gleichen Typ_Bezeichner in der Datenbank? Anders ausgedrückt, kommt ein Typ in der Fahrzeugen mehrfach vor?
+(mehr als zweimal)
+Es sollen also alle Typ-Bezeichner angezeigt werden, für die es mehrere Fahrzeuge gibt. Anzeige: Typ_Bezeichner, KFZ_Nr.
+Ordnen Sie die Ausgabe nach Typ_Bezeichner absteigend und nach der KFZ_Nr aufsteigend!
+*/
 
 
