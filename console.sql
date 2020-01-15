@@ -411,23 +411,27 @@ INSERT INTO ausleihen VALUES (SYSDATE,SYSDATE+2,2367673,2,12);
 INSERT INTO ausleihen VALUES (SYSDATE,SYSDATE+3,7834556,3,NULL);
 INSERT INTO ausleihen VALUES (SYSDATE,SYSDATE+2,5696833,4,NULL);
 INSERT INTO ausleihen VALUES (SYSDATE,SYSDATE+1,1296833,1,NULL);
-
 COMMIT;
--- Projection
-SELECT KFZ_NR FROM AUSLEIHEN;
--- Selection
-SELECT * FROM Ausleihen WHERE KFZ_NR = 2334556;
+
 
 -- AUFGABE 2.a
+/*
+ Zeigen Sie alle Fahrzeuge an, die jemals ausgeliehen oder vorbestellt wurden mit deren KFZ-Nr und Nummernschild
+ */
 SELECT KFZ_NR, NUMMERNSCHILD FROM FAHRZEUGE NATURAL JOIN (SELECT KFZ_NR FROM VORBESTELLUNGEN UNION SELECT KFZ_NR FROM AUSLEIHEN);
 
 -- AUFGABE 2.b
+/*
+ Gibt es Fahrzeuge, die noch nie ausgeliehen wurden? (Anzeige: KFZ_NR, Nummernschild)
+Lösen Sie diese Aufgabe auf zwei verschiedenen Wegen. Einmal entsprechend dem obigen Opera-
+torbaum und je einmal mit NOT IN und NOT EXISTS und einmal mit einem der OUTER JOIN- Operatoren!
+ */
 SELECT KFZ_NR, NUMMERNSCHILD FROM FAHRZEUGE NATURAL JOIN (SELECT KFZ_NR FROM FAHRZEUGE MINUS SELECT KFZ_NR FROM AUSLEIHEN);
 
 -- NOT IN
 SELECT KFZ_NR, NUMMERNSCHILD FROM FAHRZEUGE WHERE KFZ_NR NOT IN (SELECT DISTINCT KFZ_NR FROM AUSLEIHEN);
 
--- NOT EXISTS (division?)
+-- NOT EXISTS
 SELECT KFZ_NR, NUMMERNSCHILD FROM FAHRZEUGE WHERE NOT EXISTS (SELECT * FROM AUSLEIHEN WHERE Ausleihen.KFZ_NR = Fahrzeuge.KFZ_NR);
 
 -- OUTER JOIN ??????????????????
@@ -436,11 +440,19 @@ LEFT JOIN AUSLEIHEN on (Ausleihen.KFZ_NR = Fahrzeuge.KFZ_NR);
 
 
 -- AUFGABE 2.c DISTINCT da ein Auto 2 mal wiederholt
+/*
+ Welche Fahrzeuge, die schon mal vorbestellt wurden bzw. sind, haben mehr als zwei Türen?
+ Geben Sie die KFZ_NR, das Nummernschild und den Typ_Bezeichner sowie die Anzahl der Türen aus!
+ */
 
 SELECT DISTINCT KFZ_NR, NUMMERNSCHILD, Typ_Bezeichner, Anzahl_Tueren
-FROM FAHRZEUGE NATURAL JOIN  VORBESTELLUNGEN NATURAL JOIN (SELECT * FROM FAHRZEUGTYPEN WHERE Anzahl_Tueren > 2);
+FROM (FAHRZEUGE NATURAL JOIN  VORBESTELLUNGEN)
+NATURAL JOIN (SELECT * FROM FAHRZEUGTYPEN WHERE Anzahl_Tueren > 2);
 
 -- AUFGABE 2.d
+/*
+ Welche Kunden (Anzeige: Pid, Name, Strasse, PLZ, Ort) haben alle Führerscheinklassen, die in der Tabelle Führerscheinklassen erfasst sind?
+ */
 
 SELECT a.PID, a.Name, a.Strasse, a.PLZ, a.Ort FROM KUNDEN a
 WHERE NOT EXISTS( SELECT t.KlassenKennung FROM FUEHRERSCHEINKLASSEN t
@@ -450,9 +462,18 @@ SELECT DISTINCT PID, Name, Strasse, PLZ, Ort FROM KUNDEN NATURAL JOIN FUEHRERSCH
 WHERE NOT EXISTS( SELECT t.KlassenKennung FROM FUEHRERSCHEINKLASSEN t
 WHERE NOT EXISTS(SELECT b.PID, b.KlassenKennung FROM PERSON_FUEHRERSCHEINKLASSE b WHERE Kunden.PID = b.PID AND t.KlassenKennung = b.KLASSENKENNUNG));
 
+SELECT PID,Name,Strasse,PLZ,Ort FROM Kunden WHERE PID NOT IN(
+SELECT DISTINCT PID FROM ( --In der Liste gibt's mehr keine Kunde mit alle Fuehrerscheinklassen
+SELECT PID, KlassenKennung FROM Kunden, Fuehrerscheinklassen
+MINUS
+SELECT PID, KlassenKennung FROM Person_Fuehrerscheinklasse));
+
 
 -- AUFGABE 3.a
-
+/*
+ Welche schon mal ausgeliehenen Limousinen mit als 150.000 gelaufen Kilometern sind in Gummersbach zugelassen (Nummernschild fängt mit GM an)
+ und müssen bis zum 1.5.2020 zur HU (Hauptuntersuchung)? Geben Sie die KFZ_NR, das Nummernschild und den Typ_Bezeichner aus!
+ */
 SELECT f.KFZ_NR, f.Nummernschild, ft.Typ_Bezeichner FROM FAHRZEUGE f, FAHRZEUGTYPEN ft
 WHERE f.Typ_ID = ft.Typ_ID
 AND ft.Art_ID = 1
@@ -469,28 +490,39 @@ WHERE k.PID = a.PID
 GROUP BY a.PID, k.Name, k.PID
 ORDER BY k.Name ASC;
 
--- AUFGABE 3.c
--- Zeigen Sie alle Fahrzeuge an, die jemals ausgeliehen oder vorbestellt wurden mit deren KFZ-Nr und Nummernschild
-/*Modifizieren Sie die Anfrage 2 a) derart, dass eine dritte Spalte angezeigt wird, die kennzeichnet, ob dieses Fahrzeug vorbestellt (‘V‘) oder ausgeliehen (‘A‘) wurde.
-Zu diesem Zweck können Sie die SELECT- Klausel erweitern um eine Spalte mit konstantem Wert, der zugleich ein Name gegeben werden kann: SELECT ... , ‘A‘ Status ...*/
+SELECT k.PID, k.Name, count(a.PID)
+FROM  KUNDEN k, AUSLEIHEN a
+WHERE k.PID = a.PID
+GROUP BY a.PID, k.Name, k.PID
+ORDER BY a.PID ASC;
 
-SELECT  KFZ_NR, NUMMERNSCHILD FROM FAHRZEUGE NATURAL JOIN (SELECT VID, KFZ_NR FROM VORBESTELLUNGEN UNION SELECT VID, KFZ_NR FROM AUSLEIHEN);
-SELECT KFZ_NR, 'V' as Status FROM VORBESTELLUNGEN;
-SELECT KFZ_NR, 'A' as Status FROM AUSLEIHEN;
-SELECT KFZ_NR, 'V' as STatus FROM VORBESTELLUNGEN UNION SELECT KFZ_NR, 'A' as Status FROM AUSLEIHEN;
+-- AUFGABE 3.c
+/*
+ Modifizieren Sie die Anfrage 2 a) derart, dass eine dritte Spalte angezeigt wird, die kennzeichnet, ob dieses Fahrzeug vorbestellt (‘V‘)
+ oder ausgeliehen (‘A‘) wurde.
+ Zu diesem Zweck können Sie die SELECT- Klausel erweitern um eine Spalte mit konstantem Wert, der zugleich ein Name gegeben werden kann:
+ SELECT ... , ‘A‘ Status ...
+ */
+
 SELECT KFZ_NR, Nummernschild, Status FROM FAHRZEUGE NATURAL JOIN (
-    SELECT KFZ_NR, 'V' as Status FROM VORBESTELLUNGEN
-    UNION SELECT KFZ_NR, 'A' as Status FROM AUSLEIHEN
-    );
+SELECT KFZ_NR, 'V' as Status FROM VORBESTELLUNGEN
+UNION SELECT KFZ_NR, 'A' as Status FROM AUSLEIHEN);
 
 -- AUFGABE 3.d
 /*
-Gibt es Fahrzeuge mit dem gleichen Typ_Bezeichner in der Datenbank? Anders ausgedrückt, kommt ein Typ in der Fahrzeugen mehrfach vor?
-(mehr als zweimal)
-Es sollen also alle Typ-Bezeichner angezeigt werden, für die es mehrere Fahrzeuge gibt. Anzeige: Typ_Bezeichner, KFZ_Nr.
-Ordnen Sie die Ausgabe nach Typ_Bezeichner absteigend und nach der KFZ_Nr aufsteigend!
-*/
+ Gibt es Fahrzeuge mit dem gleichen Typ_Bezeichner in der Datenbank? Anders ausgedrückt, kommt ein Typ in der Fahrzeugen mehrfach vor?
+ (mehr als zweimal) JA, A4 AVANT von 1233 und 5633
+ Es sollen also alle Typ-Bezeichner angezeigt werden, für die es mehrere Fahrzeuge gibt. Anzeige: Typ_Bezeichner, KFZ_Nr.
+ Ordnen Sie die Ausgabe nach Typ_Bezeichner absteigend und nach der KFZ_Nr aufsteigend!
+ */
 
-
-
+SELECT KFZ_NR, Typ_Bezeichner FROM FAHRZEUGE
+NATURAL JOIN FAHRZEUGTYPEN
+WHERE Typ_Bezeichner IN
+(SELECT Typ_Bezeichner FROM FAHRZEUGTYPEN
+NATURAL JOIN FAHRZEUGE
+GROUP BY Typ_Bezeichner
+HAVING (COUNT(Typ_Bezeichner) > 1))
+ORDER BY Typ_Bezeichner DESC,
+KFZ_NR ASC;
 
