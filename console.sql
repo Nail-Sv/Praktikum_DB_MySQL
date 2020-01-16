@@ -434,9 +434,10 @@ SELECT KFZ_NR, NUMMERNSCHILD FROM FAHRZEUGE WHERE KFZ_NR NOT IN (SELECT DISTINCT
 -- NOT EXISTS
 SELECT KFZ_NR, NUMMERNSCHILD FROM FAHRZEUGE WHERE NOT EXISTS (SELECT * FROM AUSLEIHEN WHERE Ausleihen.KFZ_NR = Fahrzeuge.KFZ_NR);
 
--- OUTER JOIN ??????????????????
+-- OUTER JOIN
 SELECT Fahrzeuge.KFZ_NR, Fahrzeuge.NUMMERNSCHILD FROM FAHRZEUGE
-LEFT JOIN AUSLEIHEN on (Ausleihen.KFZ_NR = Fahrzeuge.KFZ_NR);
+LEFT OUTER JOIN AUSLEIHEN on (Ausleihen.KFZ_NR = Fahrzeuge.KFZ_NR)
+WHERE Ausleihen.KFZ_NR is NULL;
 
 
 -- AUFGABE 2.c DISTINCT da ein Auto 2 mal wiederholt
@@ -453,20 +454,20 @@ NATURAL JOIN (SELECT * FROM FAHRZEUGTYPEN WHERE Anzahl_Tueren > 2);
 /*
  Welche Kunden (Anzeige: Pid, Name, Strasse, PLZ, Ort) haben alle Führerscheinklassen, die in der Tabelle Führerscheinklassen erfasst sind?
  */
-
-SELECT a.PID, a.Name, a.Strasse, a.PLZ, a.Ort FROM KUNDEN a
-WHERE NOT EXISTS( SELECT t.KlassenKennung FROM FUEHRERSCHEINKLASSEN t
-WHERE NOT EXISTS(SELECT b.PID, b.KlassenKennung FROM PERSON_FUEHRERSCHEINKLASSE b WHERE a.PID = b.PID AND t.KlassenKennung = b.KLASSENKENNUNG));
-
 SELECT DISTINCT PID, Name, Strasse, PLZ, Ort FROM KUNDEN NATURAL JOIN FUEHRERSCHEINKLASSEN
 WHERE NOT EXISTS( SELECT t.KlassenKennung FROM FUEHRERSCHEINKLASSEN t
 WHERE NOT EXISTS(SELECT b.PID, b.KlassenKennung FROM PERSON_FUEHRERSCHEINKLASSE b WHERE Kunden.PID = b.PID AND t.KlassenKennung = b.KLASSENKENNUNG));
 
-SELECT PID,Name,Strasse,PLZ,Ort FROM Kunden WHERE PID NOT IN(
-SELECT DISTINCT PID FROM ( --In der Liste gibt's mehr keine Kunde mit alle Fuehrerscheinklassen
-SELECT PID, KlassenKennung FROM Kunden, Fuehrerscheinklassen
-MINUS
-SELECT PID, KlassenKennung FROM Person_Fuehrerscheinklasse));
+-- SELECT a.PID, a.Name, a.Strasse, a.PLZ, a.Ort FROM KUNDEN a
+-- WHERE NOT EXISTS( SELECT t.KlassenKennung FROM FUEHRERSCHEINKLASSEN t
+-- WHERE NOT EXISTS(SELECT b.PID, b.KlassenKennung FROM PERSON_FUEHRERSCHEINKLASSE b WHERE a.PID = b.PID AND t.KlassenKennung = b.KLASSENKENNUNG));
+--
+--
+-- SELECT PID,Name,Strasse,PLZ,Ort FROM Kunden WHERE PID NOT IN(
+-- SELECT DISTINCT PID FROM ( --In der Liste gibt's mehr keine Kunde mit alle Fuehrerscheinklassen
+-- SELECT PID, KlassenKennung FROM Kunden, Fuehrerscheinklassen
+-- MINUS
+-- SELECT PID, KlassenKennung FROM Person_Fuehrerscheinklasse));
 
 
 -- AUFGABE 3.a
@@ -480,6 +481,8 @@ AND ft.Art_ID = 1
 AND f.gelaufene_KM > 150000
 AND f.Nummernschild LIKE 'GM%'
 AND f.naechste_HU < '1.5.2020';
+
+-- alternativ AND trunc(f.naechste_hu) <= to_date('01052020','ddmmyyyy')
 
 -- AUFGABE 3.b
 -- Welche Kunden haben die meisten Fahrzeuge ausgeliehen? (Anzeige: PID und absteigend sortiert den Namen sowie die maximale Anzahl)
@@ -502,16 +505,21 @@ ORDER BY a.PID ASC;
  oder ausgeliehen (‘A‘) wurde.
  Zu diesem Zweck können Sie die SELECT- Klausel erweitern um eine Spalte mit konstantem Wert, der zugleich ein Name gegeben werden kann:
  SELECT ... , ‘A‘ Status ...
+ Erklären Sie die Unterschiede in der Ergebnismenge
  */
-
+-- 17
 SELECT KFZ_NR, Nummernschild, Status FROM FAHRZEUGE NATURAL JOIN (
 SELECT KFZ_NR, 'V' as Status FROM VORBESTELLUNGEN
 UNION SELECT KFZ_NR, 'A' as Status FROM AUSLEIHEN);
 
+-- 9
+SELECT KFZ_NR, NUMMERNSCHILD FROM FAHRZEUGE NATURAL JOIN (SELECT KFZ_NR FROM VORBESTELLUNGEN UNION SELECT KFZ_NR FROM AUSLEIHEN);
+
+
 -- AUFGABE 3.d
 /*
  Gibt es Fahrzeuge mit dem gleichen Typ_Bezeichner in der Datenbank? Anders ausgedrückt, kommt ein Typ in der Fahrzeugen mehrfach vor?
- (mehr als zweimal) JA, A4 AVANT von 1233 und 5633
+ (mehr als zweimal)
  Es sollen also alle Typ-Bezeichner angezeigt werden, für die es mehrere Fahrzeuge gibt. Anzeige: Typ_Bezeichner, KFZ_Nr.
  Ordnen Sie die Ausgabe nach Typ_Bezeichner absteigend und nach der KFZ_Nr aufsteigend!
  */
